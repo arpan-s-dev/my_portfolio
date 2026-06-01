@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { ExternalLink } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
@@ -39,6 +39,7 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
   const [snakeStatus, setSnakeStatus] = useState<"loading" | "loaded" | "error">(
     "loading"
   )
+  const imgRef = useRef<HTMLImageElement | null>(null)
 
   const palette = HEATMAP_COLORS[theme]
   const getColor = (level: ContributionLevel) => palette[level]
@@ -49,10 +50,25 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
       ? `${SNAKE_BASE}/github-contribution-grid-snake.svg`
       : `${SNAKE_BASE}/github-contribution-grid-snake-dark.svg`
 
-  // Reset to loading whenever the theme (and therefore snake src) switches, so
-  // the heatmap fallback shows again while the new variant is downloading.
+  // Sync state with the actual <img> on mount and whenever the src changes
+  // (theme switch). This is critical for the page-reload case: when the SVG
+  // is served from the browser cache, the img can be `complete` BEFORE React
+  // attaches the onLoad listener — onLoad then never fires, the status would
+  // stay "loading" forever, and the snake would remain invisible. By reading
+  // `img.complete` / `naturalWidth` directly we cover both the cached path
+  // (set to "loaded" immediately) and the fresh-fetch path (reset to
+  // "loading" and let onLoad/onError flip it later).
   useEffect(() => {
-    setSnakeStatus("loading")
+    const img = imgRef.current
+    if (!img) {
+      setSnakeStatus("loading")
+      return
+    }
+    if (img.complete) {
+      setSnakeStatus(img.naturalWidth > 0 ? "loaded" : "error")
+    } else {
+      setSnakeStatus("loading")
+    }
   }, [snakeSrc])
 
   const showSnake = snakeStatus === "loaded"
@@ -141,6 +157,7 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
+          ref={imgRef}
           key={snakeSrc}
           src={snakeSrc}
           alt={`${contributions.total} GitHub contributions in the last year, animated by a snake`}

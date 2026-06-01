@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { useTheme } from "@/components/theme-provider"
 
@@ -40,6 +40,19 @@ const orbitDurations = [20, 30, 40]
 
 export function TechStack() {
   const [hoveredTech, setHoveredTech] = useState<string | null>(null)
+  // Gate the rotating tech-icon layer behind a mount flag. framer-motion's
+  // <motion.div> with `animate` / `whileHover` / `onHoverStart` rewrites the
+  // inline `style` attribute differently on the server vs the client (the
+  // server emits a simplified `calc(50% - 66px)` form while the client emits
+  // the raw template-literal `calc(50% + ${x}px - 16px)` form), which trips
+  // React's hydration check. Rendering the rotating layer only after mount
+  // guarantees the SSR HTML and the first client render agree — the static
+  // orbit rings and the center "laptop" badge stay rendered on the server
+  // so there's no visual gap before mount.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const { theme } = useTheme()
 
   return (
@@ -92,8 +105,9 @@ export function TechStack() {
           <span className="text-2xl">💻</span>
         </motion.div>
 
-        {/* Rotating orbit containers with tech icons */}
-        {[1, 2, 3].map((orbitNum) => {
+        {/* Rotating orbit containers with tech icons — client-only to avoid
+            framer-motion SSR style mismatches (see comment at top of file). */}
+        {mounted && [1, 2, 3].map((orbitNum) => {
           const radius = orbitRadii[orbitNum - 1]
           const duration = orbitDurations[orbitNum - 1]
           const techsInOrbit = techStack.filter((t) => t.orbit === orbitNum)
