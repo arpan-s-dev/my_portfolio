@@ -13,3 +13,8 @@ __v0_jsx-dev-runtime.ts
 node_modules
 .next/
 .DS_Store
+
+# Next.js auto-generated, flips between .next/types and .next/dev/types
+# every time `npm run dev` and `npm run build` swap. See the comment in
+# the file itself: "NOTE: This file should not be edited".
+next-env.d.ts
