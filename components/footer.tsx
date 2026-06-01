@@ -50,14 +50,6 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Quote */}
-        <p
-          className="mb-6 text-center font-display text-sm italic"
-          style={{ color: "var(--text-muted)" }}
-        >
-          {'"Only a slave quantifies his existence with productivity." — Dostoevsky'}
-        </p>
-
         {/* Copyright */}
         <p
           className="text-center text-xs"
