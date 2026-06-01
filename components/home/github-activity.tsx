@@ -124,14 +124,17 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
           yet on a fresh deploy).
       */}
       <div className="overflow-x-auto">
+        {/*
+          The img is always mounted (no display:none) so the browser actually
+          fetches it. With display:none + loading=lazy, browsers skip the
+          fetch entirely and onLoad never fires.
+        */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={snakeSrc}
           src={snakeSrc}
           alt={`${contributions.total} GitHub contributions in the last year, animated by a snake`}
           className="w-full h-auto"
-          style={{ display: showSnake ? "block" : "none" }}
-          loading="lazy"
           onLoad={() => setSnakeStatus("loaded")}
           onError={() => setSnakeStatus("error")}
         />
