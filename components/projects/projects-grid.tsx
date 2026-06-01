@@ -17,15 +17,13 @@ const shippedProjects: Project[] = [
     title: "Unified Load Board",
     description: "One interface for loads across DAT, Truckstop, and Amazon Relay. FastAPI backend, adapter-pattern architecture, Next.js frontend.",
     stack: ["FastAPI", "Next.js", "Python", "TypeScript", "Pydantic"],
-    github: "#",
-    demo: "#"
+    github: "https://github.com/Arpanjeetsingh/UniLoadBoard"
   },
   {
     title: "Freight Doc Matcher",
     description: "Python CLI that matches Bills of Lading to Rate Confirmations across 13 brokers using a hybrid Tesseract + Claude pipeline. Outputs hyperlinked Excel.",
     stack: ["Python", "Claude API", "Tesseract", "openpyxl", "pdfplumber"],
-    github: "#",
-    demo: "#"
+    github: "https://github.com/Arpanjeetsingh/POD_RC_AUTO_OCR"
   }
 ]
 
@@ -125,29 +123,29 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
       {/* Links */}
       <div className="flex items-center gap-4">
-        <a
-          href={project.github}
-          className="text-sm font-medium underline underline-offset-4 transition-opacity hover:opacity-70"
-          style={{ color: "var(--accent)" }}
-        >
-          GitHub
-        </a>
-        {project.demo ? (
+        {/*
+          GitHub link only renders when a real URL is wired up. Planned
+          projects without a repo yet skip it entirely and show "Coming soon".
+        */}
+        {project.github && project.github !== "#" ? (
           <a
-            href={project.demo}
+            href={project.github}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm font-medium underline underline-offset-4 transition-opacity hover:opacity-70"
             style={{ color: "var(--accent)" }}
           >
-            Live Demo
+            GitHub
           </a>
-        ) : (
-          <span 
+        ) : null}
+        {project.planned ? (
+          <span
             className="text-sm"
             style={{ color: "var(--text-muted)" }}
           >
             Coming soon
           </span>
-        )}
+        ) : null}
       </div>
     </motion.div>
   )

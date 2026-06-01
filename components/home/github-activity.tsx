@@ -128,16 +128,27 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
           The img is always mounted (no display:none) so the browser actually
           fetches it. With display:none + loading=lazy, browsers skip the
           fetch entirely and onLoad never fires.
+
+          The wrapper enforces aspect-ratio 880/150 with overflow:hidden so
+          the bottom ~22% of the SVG (Platane/snk's built-in "stack" progress
+          bar at y=144 and the empty padding below it) is cropped out. The
+          contribution grid sits at y=2-110 in viewBox coords, well within the
+          kept top portion.
         */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={snakeSrc}
-          src={snakeSrc}
-          alt={`${contributions.total} GitHub contributions in the last year, animated by a snake`}
-          className="w-full h-auto"
-          onLoad={() => setSnakeStatus("loaded")}
-          onError={() => setSnakeStatus("error")}
-        />
+        <div
+          className="overflow-hidden"
+          style={{ aspectRatio: "880 / 150" }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={snakeSrc}
+            src={snakeSrc}
+            alt={`${contributions.total} GitHub contributions in the last year, animated by a snake`}
+            className="w-full h-auto block"
+            onLoad={() => setSnakeStatus("loaded")}
+            onError={() => setSnakeStatus("error")}
+          />
+        </div>
 
         {!showSnake && (
           <>
