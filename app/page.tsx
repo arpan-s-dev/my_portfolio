@@ -1,5 +1,3 @@
-"use client"
-
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ProfileCard } from "@/components/home/profile-card"
@@ -8,8 +6,13 @@ import { TerritoryMap } from "@/components/home/territory-map"
 import { LinkedInCard } from "@/components/home/linkedin-card"
 import { TechStack } from "@/components/home/tech-stack"
 import { AIAssistant } from "@/components/home/ai-assistant"
+import { getContributions } from "@/lib/github-contributions"
 
-export default function HomePage() {
+const GITHUB_USERNAME = "Arpanjeetsingh"
+
+export default async function HomePage() {
+  const contributions = await getContributions(GITHUB_USERNAME)
+
   return (
     <main className="min-h-screen" style={{ backgroundColor: "var(--bg-base)" }}>
       <Navigation />
@@ -23,7 +26,10 @@ export default function HomePage() {
 
           {/* Row 1 right: GitHub Activity */}
           <div className="col-span-12 md:col-span-8">
-            <GitHubActivity />
+            <GitHubActivity
+              contributions={contributions}
+              username={GITHUB_USERNAME}
+            />
           </div>
 
           {/* Row 2 right: Territory + LinkedIn side-by-side */}
