@@ -28,14 +28,14 @@ export function ProfileCard() {
           }}
         >
           <div
-            className="h-full w-full rounded-full flex items-center justify-center text-5xl"
+            className="h-full w-full rounded-full flex items-center justify-center text-4xl"
             style={{ backgroundColor: "var(--bg-elevated)" }}
           >
             <span
-              className="font-display font-semibold"
+              className="font-display font-semibold tracking-tight"
               style={{ color: "var(--accent)" }}
             >
-              A
+              A.S
             </span>
           </div>
           {/* Online indicator */}
