@@ -1,0 +1,248 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Chinese Rocks font */
+@font-face {
+  font-family: 'Chinese Rocks';
+  src: url('/fonts/chinese-rocks-rg.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Arthur Theme (RDR2 inspired) - Default */
+:root {
+  --bg-base: #1a1410;
+  --bg-card: #221a14;
+  --bg-elevated: #2a2018;
+  --text-primary: #e8dcc4;
+  --text-muted: #a8967a;
+  --accent: #c9a961;
+  --accent-secondary: #c9a961;
+  --border-faint: #3a2e22;
+  --border-accent: #c9a961;
+  
+  /* Map colors */
+  --map-stroke: #c9a961;
+  --map-pin: #c9a961;
+  --map-label: #e8dcc4;
+  
+  /* Gradient colors for Atie theme (not used in Arthur) */
+  --gradient-start: #c9a961;
+  --gradient-end: #c9a961;
+  
+  /* Theme-specific */
+  --radius-theme: 0px;
+  --font-display: 'Chinese Rocks', 'Cormorant Garamond', serif;
+  --font-body: 'Inter', sans-serif;
+  
+  /* shadcn compatibility */
+  --background: #1a1410;
+  --foreground: #e8dcc4;
+  --card: #221a14;
+  --card-foreground: #e8dcc4;
+  --popover: #221a14;
+  --popover-foreground: #e8dcc4;
+  --primary: #c9a961;
+  --primary-foreground: #1a1410;
+  --secondary: #2a2018;
+  --secondary-foreground: #e8dcc4;
+  --muted: #2a2018;
+  --muted-foreground: #a8967a;
+  --accent: #c9a961;
+  --accent-foreground: #1a1410;
+  --destructive: #dc2626;
+  --destructive-foreground: #e8dcc4;
+  --border: #3a2e22;
+  --input: #3a2e22;
+  --ring: #c9a961;
+  --radius: 0px;
+}
+
+/* Atie Theme (Modern dark + neon) */
+.theme-atie {
+  --bg-base: #0a0a0a;
+  --bg-card: #141414;
+  --bg-elevated: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-muted: #888888;
+  --accent: #a855f7;
+  --accent-secondary: #06b6d4;
+  --border-faint: #262626;
+  --border-accent: #a855f7;
+  
+  /* Map colors */
+  --map-stroke: #06b6d4;
+  --map-pin: #a855f7;
+  --map-label: #ffffff;
+  
+  /* Gradient colors */
+  --gradient-start: #a855f7;
+  --gradient-end: #06b6d4;
+  
+  /* Theme-specific */
+  --radius-theme: 12px;
+  --font-display: 'Chinese Rocks', 'JetBrains Mono', monospace;
+  --font-body: 'JetBrains Mono', monospace;
+  
+  /* shadcn compatibility */
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #141414;
+  --card-foreground: #ffffff;
+  --popover: #141414;
+  --popover-foreground: #ffffff;
+  --primary: #a855f7;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
+  --accent: #a855f7;
+  --accent-foreground: #ffffff;
+  --border: #262626;
+  --input: #262626;
+  --ring: #a855f7;
+  --radius: 12px;
+}
+
+@theme inline {
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+}
+
+/* Noise overlay for Arthur theme */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.theme-atie .noise-overlay {
+  display: none;
+}
+
+/* Star/dot pattern for Atie theme */
+.theme-atie .star-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.05;
+  background-image: radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Section labels */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+}
+
+.theme-atie .section-label {
+  color: var(--text-muted);
+}
+
+/* Card styles */
+.theme-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-faint);
+  border-radius: var(--radius-theme);
+}
+
+/* Navigation pill */
+.nav-pill {
+  border-radius: var(--radius-theme);
+}
+
+.theme-atie .nav-pill {
+  border-radius: 9999px;
+}
+
+/* Button styles */
+.theme-button {
+  border-radius: var(--radius-theme);
+}
+
+.theme-atie .theme-button {
+  border-radius: 9999px;
+}
+
+/* Badge styles */
+.theme-badge {
+  border-radius: var(--radius-theme);
+}
+
+.theme-atie .theme-badge {
+  border-radius: 9999px;
+}
+
+/* Timeline line gradient for Atie */
+.theme-atie .timeline-line {
+  background: linear-gradient(180deg, var(--gradient-start), var(--gradient-end));
+}
+
+/* Font classes */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}

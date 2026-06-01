@@ -1,0 +1,60 @@
+"use client"
+
+import { motion } from "framer-motion"
+import Image from "next/image"
+import { useTheme } from "@/components/theme-provider"
+
+export function TerritoryMap() {
+  const { theme } = useTheme()
+
+  const mapFilter =
+    theme === "arthur"
+      ? "sepia(0.2) saturate(0.85) brightness(0.85)"
+      : "grayscale(1) brightness(0.7)"
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.7, delay: 0.2 }}
+      className="theme-card p-6 h-full flex flex-col"
+    >
+      {/* Section Label */}
+      <p
+        className="text-xs font-medium uppercase tracking-[0.2em] mb-4"
+        style={{ color: "var(--accent)" }}
+      >
+        TERRITORY
+      </p>
+
+      {/* Static map image */}
+      <div
+        className="relative w-full overflow-hidden border"
+        style={{
+          borderColor: "var(--border-faint)",
+          borderRadius: "var(--radius-theme)",
+          backgroundColor: "var(--bg-card)",
+        }}
+      >
+        <Image
+          src="/territory-map.png"
+          alt="Hand-drawn map of the SJSU, Bay Area, and Central Valley territory"
+          width={1024}
+          height={559}
+          className="w-full max-h-[280px] object-cover"
+          style={{ filter: mapFilter }}
+          priority={false}
+        />
+      </div>
+
+      {/* Caption */}
+      <p
+        className="mt-3 text-center text-xs uppercase tracking-[0.2em]"
+        style={{ color: "var(--text-muted)" }}
+      >
+        SJSU · BAY AREA · CENTRAL VALLEY
+      </p>
+    </motion.div>
+  )
+}
