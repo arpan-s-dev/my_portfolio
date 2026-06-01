@@ -141,19 +141,16 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
         invisible. Keeping the slot open guarantees the browser actually
         fetches the SVG, fires onLoad, and the heatmap fallback unmounts.
 
-        Negative -mx-6 -mb-6 escapes the card's p-6 padding so the snake
-        renders edge-to-edge of the card and anchors to its bottom corners.
-        The wrapper aspect-ratio 880/195 (taller than the raw 880/150 it
-        used to be) combined with transform: scale(1.2) on the img makes
-        the snake render noticeably larger — about 20% bigger in both
-        axes — while transform-origin: top center keeps the contribution
-        grid's first row anchored at the top edge so nothing is clipped
-        from above. The bottom overflow naturally cuts Platane/snk's
-        built-in "stack" progress bar at viewBox y=144.
+        Sits INSIDE the card's p-6 padding (no negative margins, no scale
+        upsizing) so the contribution grid never bleeds past or gets clipped
+        at the card edges. Wrapper aspect-ratio 880/150 with overflow:hidden
+        crops Platane/snk's built-in "stack" progress bar at viewBox y=144
+        and the empty padding below it, while the SVG renders at exactly
+        the wrapper's width so no cells fall off the sides.
       */}
       <div
-        className="-mx-6 -mb-6 overflow-hidden rounded-b-[inherit] bg-transparent"
-        style={{ aspectRatio: "880 / 195" }}
+        className="overflow-hidden"
+        style={{ aspectRatio: "880 / 150" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -170,8 +167,6 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
           style={{
             opacity: showSnake ? 1 : 0,
             transition: "opacity 200ms ease-out",
-            transform: "scale(1.2)",
-            transformOrigin: "top center",
           }}
         />
       </div>
