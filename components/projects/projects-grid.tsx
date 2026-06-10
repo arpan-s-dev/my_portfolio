@@ -17,13 +17,13 @@ const shippedProjects: Project[] = [
     title: "Unified Load Board",
     description: "One interface for loads across DAT, Truckstop, and Amazon Relay. FastAPI backend, adapter-pattern architecture, Next.js frontend.",
     stack: ["FastAPI", "Next.js", "Python", "TypeScript", "Pydantic"],
-    github: "https://github.com/Arpanjeetsingh/UniLoadBoard"
+    github: "https://github.com/arpan-s-dev/UniLoadBoard"
   },
   {
     title: "Freight Doc Matcher",
     description: "Python CLI that matches Bills of Lading to Rate Confirmations across 13 brokers using a hybrid Tesseract + Claude pipeline. Outputs hyperlinked Excel.",
     stack: ["Python", "Claude API", "Tesseract", "openpyxl", "pdfplumber"],
-    github: "https://github.com/Arpanjeetsingh/POD_RC_AUTO_OCR"
+    github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR"
   }
 ]
 

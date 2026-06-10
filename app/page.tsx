@@ -8,7 +8,7 @@ import { TechStack } from "@/components/home/tech-stack"
 import { AIAssistant } from "@/components/home/ai-assistant"
 import { getContributions } from "@/lib/github-contributions"
 
-const GITHUB_USERNAME = "Arpanjeetsingh"
+const GITHUB_USERNAME = "arpan-s-dev"
 
 export default async function HomePage() {
   const contributions = await getContributions(GITHUB_USERNAME)

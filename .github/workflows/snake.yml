@@ -19,7 +19,7 @@ jobs:
       - name: Generate contribution snake SVGs
         uses: Platane/snk/svg-only@v3
         with:
-          github_user_name: Arpanjeetsingh
+          github_user_name: arpan-s-dev
           # Two themed variants matching the site palette (lib in app/globals.css).
           # Arthur (default) -> ochre on warm browns, dots match the heatmap exactly.
           # Atie (-dark)     -> Atie purple accent on the GitHub-dark green dot palette.
