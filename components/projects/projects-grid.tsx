@@ -66,14 +66,29 @@ const plannedProjects: Project[] = [
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const { theme } = useTheme()
+  const hasRepo = Boolean(project.github && project.github !== "#")
+
+  // The whole card is a link when a real GitHub URL is wired up — clicking
+  // anywhere on a shipped card opens the repo in a new tab. Planned cards
+  // (github === "#") fall back to a plain div with a "Coming soon" hint.
+  const Wrapper: typeof motion.a = hasRepo ? motion.a : (motion.div as typeof motion.a)
+  const wrapperProps = hasRepo
+    ? {
+        href: project.github,
+        target: "_blank" as const,
+        rel: "noopener noreferrer",
+        "aria-label": `${project.title} on GitHub`,
+      }
+    : {}
 
   return (
-    <motion.div
+    <Wrapper
+      {...wrapperProps}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="theme-card relative p-6 transition-all duration-300 hover:-translate-y-0.5"
+      className={`theme-card relative p-6 transition-all duration-300 hover:-translate-y-0.5 ${hasRepo ? "cursor-pointer block no-underline" : ""}`}
       style={{
         borderColor: "var(--border-faint)",
       }}
@@ -83,9 +98,9 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
     >
       {/* Planned badge */}
       {project.planned && (
-        <span 
+        <span
           className="theme-badge absolute top-4 right-4 px-2 py-1 text-xs font-medium"
-          style={{ 
+          style={{
             backgroundColor: theme === "arthur" ? "rgba(201, 169, 97, 0.2)" : "rgba(168, 85, 247, 0.2)",
             color: "var(--accent)"
           }}
@@ -95,7 +110,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       )}
 
       {/* Title */}
-      <h3 
+      <h3
         className="font-display text-xl font-semibold mb-2 pr-20"
         style={{ color: "var(--text-primary)" }}
       >
@@ -103,7 +118,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       </h3>
 
       {/* Description */}
-      <p 
+      <p
         className="text-sm leading-relaxed mb-4"
         style={{ color: "var(--text-muted)" }}
       >
@@ -116,7 +131,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           <span
             key={tech}
             className="px-2 py-1 text-xs font-medium uppercase tracking-wider border"
-            style={{ 
+            style={{
               borderColor: "var(--border-faint)",
               color: "var(--text-muted)",
               borderRadius: "var(--radius-theme)"
@@ -127,22 +142,15 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         ))}
       </div>
 
-      {/* Links */}
+      {/* Footer hint — visual cue only; the whole card is the link. */}
       <div className="flex items-center gap-4">
-        {/*
-          GitHub link only renders when a real URL is wired up. Planned
-          projects without a repo yet skip it entirely and show "Coming soon".
-        */}
-        {project.github && project.github !== "#" ? (
-          <a
-            href={project.github}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-medium underline underline-offset-4 transition-opacity hover:opacity-70"
+        {hasRepo ? (
+          <span
+            className="text-sm font-medium underline underline-offset-4"
             style={{ color: "var(--accent)" }}
           >
-            GitHub
-          </a>
+            View on GitHub →
+          </span>
         ) : null}
         {project.planned ? (
           <span
@@ -153,7 +161,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           </span>
         ) : null}
       </div>
-    </motion.div>
+    </Wrapper>
   )
 }
 

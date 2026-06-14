@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react"
 import { motion } from "framer-motion"
 import { useTheme } from "@/components/theme-provider"
-import { BarChart3, Zap, TrendingUp, Activity } from "lucide-react"
+import { BarChart3, Zap, TrendingUp, Activity, Github } from "lucide-react"
 import { MermaidDiagram } from "@/components/architecture/mermaid-diagram"
 
 interface TechStackRow {
@@ -34,6 +34,7 @@ interface ArchitectureProject {
   description: string
   stats: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }[]
   category: string
+  github?: string
   systemDesignDiagram?: string
   systemDesignDiagrams?: SystemDesignDiagram[]
   techStack?: TechStackRow[]
@@ -486,6 +487,7 @@ const architectureProjects: ArchitectureProject[] = [
     title: "Distributed Load Board Architecture",
     tags: ["Microservices", "Trucking"],
     description: "Adapter-pattern backend that fans out to multiple load board sources in parallel and normalizes responses to a unified schema.",
+    github: "https://github.com/arpan-s-dev/UniLoadBoard",
     stats: [
       { label: "Daily Requests", value: "500K", icon: BarChart3 },
       { label: "p99 Latency", value: "80ms", icon: Zap },
@@ -549,6 +551,7 @@ const architectureProjects: ArchitectureProject[] = [
     title: "POD_RC_AUTO_OCR",
     tags: ["Python CLI", "OCR", "Claude AI"],
     description: "Earlier heuristic predecessor of Freight Doc Matcher. Python CLI that auto-matches Bill of Lading PDFs to Rate Confirmations using a hybrid extraction pipeline (native text → Tesseract OCR → Claude vision) and a 100-point additive heuristic scorer. Outputs a clickable Excel spreadsheet. Superseded by the transformer-based Freight Doc Matcher.",
+    github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR",
     stats: [
       { label: "PDFs / Day", value: "20–50", icon: BarChart3 },
       { label: "Per Batch", value: "<2 min", icon: Zap },
@@ -613,6 +616,7 @@ const architectureProjects: ArchitectureProject[] = [
     title: "Freight Doc Matcher",
     tags: ["Transformers", "Fine-Tuning", "DuckDB", "BI"],
     description: "Portfolio-grade data-science project: a fine-tuned DistilBERT cross-encoder reranks bi-encoder candidates (retrieve-then-rerank, Ditto / VLDB 2020), and a DuckDB warehouse exposes analytical SQL views that export to Parquet for Tableau / Power BI. The original 100-pt heuristic and a Fellegi–Sunter linkage model are kept as benchmark baselines.",
+    github: "https://github.com/arpan-s-dev/Freight-Doc-Matcher",
     stats: [
       { label: "F1 (noisy lanes)", value: "0.65 → 0.87", icon: TrendingUp },
       { label: "Comparisons", value: "5× fewer", icon: Zap },
@@ -728,6 +732,25 @@ function ArchitectureCard({ project, index }: { project: ArchitectureProject; in
         >
           {project.description}
         </p>
+
+        {/* GitHub link */}
+        {project.github ? (
+          <a
+            href={project.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${project.title} on GitHub`}
+            className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium uppercase tracking-wider border transition-colors hover:opacity-80"
+            style={{
+              borderColor: "var(--accent)",
+              color: "var(--accent)",
+              borderRadius: "var(--radius-theme)",
+            }}
+          >
+            <Github className="h-3.5 w-3.5" />
+            View on GitHub
+          </a>
+        ) : null}
       </div>
 
       {/* Stats */}
