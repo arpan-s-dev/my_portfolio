@@ -316,10 +316,10 @@ const docMatcherDiagram = `flowchart LR
     AUTO --> ORG
     MAN --> ORG`
 
-const freightMatcherV2Pipeline = `flowchart LR
+const freightMatcherPipeline = `flowchart LR
     IN["Input PDFs<br/>BOL + Rate Con"]
 
-    subgraph Extract["Extraction (inherited from v0.1)"]
+    subgraph Extract["Extraction (inherited from POD_RC_AUTO_OCR)"]
         direction TB
         CLS["classify_pdf"]
         TXT["extract_text<br/>pdfplumber / Tesseract"]
@@ -371,7 +371,7 @@ const freightMatcherV2Pipeline = `flowchart LR
     FB --> DUCK
     EXP --> BI2["Tableau / Power BI"]`
 
-const freightMatcherV2Classes = `classDiagram
+const freightMatcherClasses = `classDiagram
     class DocType {
         <<enumeration>>
         BOL
@@ -456,7 +456,7 @@ const freightMatcherV2Classes = `classDiagram
     FellegiSunter ..> Match : baseline
     AnalyticsWarehouse ..> Match : ingests`
 
-const freightMatcherV2Sequence = `sequenceDiagram
+const freightMatcherSequence = `sequenceDiagram
     actor User
     participant CLI as cli.run_matcher
     participant PL as pipeline
@@ -546,9 +546,9 @@ const architectureProjects: ArchitectureProject[] = [
   },
   {
     id: "doc-matcher",
-    title: "POD_RC_AUTO_OCR (v0.1)",
+    title: "POD_RC_AUTO_OCR",
     tags: ["Python CLI", "OCR", "Claude AI"],
-    description: "v0.1 baseline of Freight Doc Matcher. Python CLI that auto-matches Bill of Lading PDFs to Rate Confirmations using a hybrid extraction pipeline (native text → Tesseract OCR → Claude vision) and a 100-point additive heuristic scorer. Outputs a clickable Excel spreadsheet. Superseded by the v0.2 transformer-based matcher.",
+    description: "Earlier heuristic predecessor of Freight Doc Matcher. Python CLI that auto-matches Bill of Lading PDFs to Rate Confirmations using a hybrid extraction pipeline (native text → Tesseract OCR → Claude vision) and a 100-point additive heuristic scorer. Outputs a clickable Excel spreadsheet. Superseded by the transformer-based Freight Doc Matcher.",
     stats: [
       { label: "PDFs / Day", value: "20–50", icon: BarChart3 },
       { label: "Per Batch", value: "<2 min", icon: Zap },
@@ -610,9 +610,9 @@ const architectureProjects: ArchitectureProject[] = [
   },
   {
     id: "freight-doc-matcher",
-    title: "Freight Doc Matcher (v0.2)",
+    title: "Freight Doc Matcher",
     tags: ["Transformers", "Fine-Tuning", "DuckDB", "BI"],
-    description: "v0.2 reframes the CLI as a portfolio-grade data-science project: a fine-tuned DistilBERT cross-encoder reranks bi-encoder candidates (retrieve-then-rerank, Ditto / VLDB 2020), and a DuckDB warehouse exposes analytical SQL views that export to Parquet for Tableau / Power BI. The v0.1 heuristic and a Fellegi–Sunter linkage model are kept as benchmark baselines.",
+    description: "Portfolio-grade data-science project: a fine-tuned DistilBERT cross-encoder reranks bi-encoder candidates (retrieve-then-rerank, Ditto / VLDB 2020), and a DuckDB warehouse exposes analytical SQL views that export to Parquet for Tableau / Power BI. The original 100-pt heuristic and a Fellegi–Sunter linkage model are kept as benchmark baselines.",
     stats: [
       { label: "F1 (noisy lanes)", value: "0.65 → 0.87", icon: TrendingUp },
       { label: "Comparisons", value: "5× fewer", icon: Zap },
@@ -621,16 +621,16 @@ const architectureProjects: ArchitectureProject[] = [
     ],
     category: "AI Pipelines",
     systemDesignDiagrams: [
-      { label: "Pipeline (matcher process --matcher ml → analytics)", chart: freightMatcherV2Pipeline },
-      { label: "Domain model + components (UML)", chart: freightMatcherV2Classes },
-      { label: "End-to-end sequence", chart: freightMatcherV2Sequence }
+      { label: "Pipeline (matcher process --matcher ml → analytics)", chart: freightMatcherPipeline },
+      { label: "Domain model + components (UML)", chart: freightMatcherClasses },
+      { label: "End-to-end sequence", chart: freightMatcherSequence }
     ],
     techStack: [
       { layer: "Serialization", choice: "Ditto-style tagged text", why: "Converts extracted fields into `[COL] field [VAL] value` strings a transformer can read — no hand-engineered features." },
       { layer: "Bi-encoder Blocker", choice: "sentence-transformers `all-MiniLM-L6-v2`", why: "Embeds every doc; for each BOL, retrieves top-k Rate Cons. Turns 400 × 400 = 160k comparisons into ~7k." },
       { layer: "Hybrid Blocker", choice: "Structural keys ∪ semantic top-k", why: "Combines shared ZIP / PO with bi-encoder candidates — fixes cases where semantic search alone missed the right document." },
       { layer: "Cross-encoder", choice: "`distilbert-base-uncased` (fine-tuned)", why: "Reads BOL + Rate Con jointly via HuggingFace, outputs match probability. Trained on RTX 5050 GPU." },
-      { layer: "Baseline 1", choice: "100-pt heuristic (v0.1)", why: "Hand-tuned weights. Fast and accurate on clean data, collapses to F1 ≈ 0.65 under OCR noise on recurring lanes." },
+      { layer: "Baseline 1", choice: "100-pt heuristic (POD_RC_AUTO_OCR)", why: "Hand-tuned weights. Fast and accurate on clean data, collapses to F1 ≈ 0.65 under OCR noise on recurring lanes." },
       { layer: "Baseline 2", choice: "Fellegi–Sunter", why: "Classic probabilistic record-linkage model. Retained as an interpretable benchmark against the learned matcher." },
       { layer: "Analytics Warehouse", choice: "DuckDB", why: "Zero infrastructure — in-process, one file, no Postgres / Docker. Exports natively to Parquet for Tableau / Power BI." },
       { layer: "Exports", choice: "Parquet + CSV", why: "Parquet is Tableau / Power BI native; CSV is the universal fallback." },
@@ -642,7 +642,7 @@ const architectureProjects: ArchitectureProject[] = [
         body: [
           "Implements the retrieve-then-rerank architecture from Ditto (Li et al., VLDB 2020). Each document is serialized to a tagged `[COL] field [VAL] value` string before either model sees it.",
           "Block: a hybrid candidate generator combines structural keys (shared ZIP / PO) with a bi-encoder semantic top-k (`all-MiniLM-L6-v2`). On a 400-document batch this cuts 160,000 comparisons down to ~7,000.",
-          "Decide: a fine-tuned `distilbert-base-uncased` cross-encoder reads a BOL and candidate Rate Con jointly and emits a match probability. On a labeled synthetic benchmark with OCR-style noise the model recovers F1 from 0.65 → 0.87 vs. the v0.1 heuristic; full methodology and numbers are in `docs/efficiency_writeup.md`."
+          "Decide: a fine-tuned `distilbert-base-uncased` cross-encoder reads a BOL and candidate Rate Con jointly and emits a match probability. On a labeled synthetic benchmark with OCR-style noise the model recovers F1 from 0.65 → 0.87 vs. the original heuristic; full methodology and numbers are in `docs/efficiency_writeup.md`."
         ]
       },
       {
@@ -662,12 +662,12 @@ const architectureProjects: ArchitectureProject[] = [
       {
         heading: "Backwards Compatibility",
         body: [
-          "v0.2 does not change the default `matcher process` behavior — heuristic matching is still the default. The ML path is opt-in via `--matcher ml`, and if torch or a trained model is missing it falls back to the heuristic with a warning, so the core CLI always works on a stock Python install."
+          "The ML pipeline does not change the default `matcher process` behavior — heuristic matching is still the default. The ML path is opt-in via `--matcher ml`, and if torch or a trained model is missing it falls back to the heuristic with a warning, so the core CLI always works on a stock Python install."
         ]
       }
     ],
     outcomes: {
-      status: "Released as v0.2 on top of the POD_RC_AUTO_OCR v0.1 baseline. Measured: F1 went from 0.65 → 0.87 on the recurring-lane / OCR-noise benchmark with 5× fewer comparisons. On a smaller clean held-out set the fine-tuned model scores F1 = 1.000 — full methodology in `docs/efficiency_writeup.md`.",
+      status: "Built on top of the POD_RC_AUTO_OCR heuristic baseline. Measured: F1 went from 0.65 → 0.87 on the recurring-lane / OCR-noise benchmark with 5× fewer comparisons. On a smaller clean held-out set the fine-tuned model scores F1 = 1.000 — full methodology in `docs/efficiency_writeup.md`.",
       roadmap: [
         "Larger labeled real-world training set — current numbers are on synthetic + held-out pairs",
         "Calibrated probability outputs — currently thresholded; calibration would let downstream UIs surface confidence",

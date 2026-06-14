@@ -21,13 +21,13 @@ const shippedProjects: Project[] = [
   },
   {
     title: "Freight Doc Matcher",
-    description: "v0.2 — adds a fine-tuned DistilBERT cross-encoder and bi-encoder blocking on top of the v0.1 pipeline, plus a DuckDB analytics layer with Parquet/CSV exports for Tableau and Power BI. F1 0.65 → 0.87 on noisy recurring lanes.",
+    description: "Fine-tuned DistilBERT cross-encoder with bi-encoder blocking matches Bills of Lading to Rate Confirmations across 13 brokers, plus a DuckDB analytics layer with Parquet/CSV exports for Tableau and Power BI. F1 0.65 → 0.87 on noisy recurring lanes.",
     stack: ["PyTorch", "HuggingFace", "DistilBERT", "sentence-transformers", "DuckDB", "Parquet"],
     github: "https://github.com/arpan-s-dev/Freight-Doc-Matcher"
   },
   {
     title: "POD_RC_AUTO_OCR",
-    description: "v0.1 baseline of Freight Doc Matcher. Python CLI that matches Bills of Lading to Rate Confirmations across 13 brokers via a hybrid Tesseract + Claude extraction pipeline and a 100-point heuristic scorer. Outputs hyperlinked Excel.",
+    description: "Earlier heuristic predecessor of Freight Doc Matcher. Python CLI that matches Bills of Lading to Rate Confirmations across 13 brokers via a hybrid Tesseract + Claude extraction pipeline and a 100-point additive scorer. Outputs hyperlinked Excel.",
     stack: ["Python", "Claude API", "Tesseract", "openpyxl", "pdfplumber"],
     github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR"
   }
