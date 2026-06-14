@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import Image from "next/image"
 import Link from "next/link"
 import { FolderOpen } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
@@ -28,15 +29,17 @@ export function ProfileCard() {
           }}
         >
           <div
-            className="h-full w-full rounded-full flex items-center justify-center text-4xl"
+            className="relative h-full w-full rounded-full overflow-hidden"
             style={{ backgroundColor: "var(--bg-elevated)" }}
           >
-            <span
-              className="font-display font-semibold tracking-tight"
-              style={{ color: "var(--accent)" }}
-            >
-              A.S
-            </span>
+            <Image
+              src="/headshot.jpg"
+              alt="Arpanjeet Singh"
+              fill
+              sizes="160px"
+              priority
+              className="object-cover"
+            />
           </div>
           {/* Online indicator */}
           <div
