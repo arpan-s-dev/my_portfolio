@@ -1,19 +1,30 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 import Image from "next/image"
-import Link from "next/link"
 import { FolderOpen } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 
 export function ProfileCard() {
   const { theme } = useTheme()
+  const prefersReducedMotion = useReducedMotion()
+
+  const handleProjectsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    const el = document.getElementById("projects")
+    if (!el) return
+    el.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "start",
+    })
+    history.replaceState(null, "", "#projects")
+  }
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       className="theme-card p-6 md:p-8 h-full flex flex-col justify-between gap-8"
     >
       {/* Top: headshot + identity */}
@@ -114,9 +125,10 @@ export function ProfileCard() {
 
       {/* Bottom: primary CTA */}
       <div className="flex flex-col">
-        <Link
-          href="/projects"
-          className="theme-button inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium border transition-colors hover:opacity-80"
+        <a
+          href="#projects"
+          onClick={handleProjectsClick}
+          className="theme-button inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium border transition-all duration-200 ease-out hover:opacity-80 hover:-translate-y-0.5"
           style={{
             borderColor: "var(--accent)",
             backgroundColor: "var(--accent)",
@@ -125,7 +137,7 @@ export function ProfileCard() {
         >
           <FolderOpen className="h-4 w-4" />
           View Projects
-        </Link>
+        </a>
       </div>
     </motion.div>
   )

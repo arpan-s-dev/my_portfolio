@@ -6,6 +6,8 @@ import { TerritoryMap } from "@/components/home/territory-map"
 import { LinkedInCard } from "@/components/home/linkedin-card"
 import { TechStack } from "@/components/home/tech-stack"
 import { AIAssistant } from "@/components/home/ai-assistant"
+import { ProjectsSection } from "@/components/projects/projects-section"
+import { ArchitectureSection } from "@/components/architecture/architecture-section"
 import { getContributions } from "@/lib/github-contributions"
 
 const GITHUB_USERNAME = "arpan-s-dev"
@@ -17,38 +19,39 @@ export default async function HomePage() {
     <main className="min-h-screen" style={{ backgroundColor: "var(--bg-base)" }}>
       <Navigation />
 
-      <div className="mx-auto max-w-[1300px] px-6 pt-28 pb-12 md:pt-32">
-        <div className="grid grid-cols-12 gap-6 grid-flow-row-dense auto-rows-min">
-          {/* Profile card: spans entire left column across rows 1 + 2 */}
-          <div className="col-span-12 md:col-span-4 md:row-span-2">
-            <ProfileCard />
-          </div>
+      <section id="home" className="scroll-mt-28">
+        <div className="mx-auto max-w-[1300px] px-6 pt-28 pb-12 md:pt-32">
+          <div className="grid grid-cols-12 gap-6 grid-flow-row-dense auto-rows-min">
+            <div className="col-span-12 md:col-span-4 md:row-span-2">
+              <ProfileCard />
+            </div>
 
-          {/* Row 1 right: GitHub Activity */}
-          <div className="col-span-12 md:col-span-8">
-            <GitHubActivity
-              contributions={contributions}
-              username={GITHUB_USERNAME}
-            />
-          </div>
+            <div className="col-span-12 md:col-span-8">
+              <GitHubActivity
+                contributions={contributions}
+                username={GITHUB_USERNAME}
+              />
+            </div>
 
-          {/* Row 2 right: Territory + LinkedIn side-by-side */}
-          <div className="col-span-12 md:col-span-5">
-            <TerritoryMap />
-          </div>
-          <div className="col-span-12 md:col-span-3">
-            <LinkedInCard />
-          </div>
+            <div className="col-span-12 md:col-span-5">
+              <TerritoryMap />
+            </div>
+            <div className="col-span-12 md:col-span-3">
+              <LinkedInCard />
+            </div>
 
-          {/* Row 3: Tech Stack (under Profile) + AI Assistant */}
-          <div className="col-span-12 md:col-span-4">
-            <TechStack />
-          </div>
-          <div className="col-span-12 md:col-span-8">
-            <AIAssistant />
+            <div className="col-span-12 md:col-span-4">
+              <TechStack />
+            </div>
+            <div className="col-span-12 md:col-span-8">
+              <AIAssistant />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <ProjectsSection />
+      <ArchitectureSection />
 
       <Footer />
     </main>

@@ -145,6 +145,25 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
   }
+  /* Smooth anchor scroll across the single-page sections. */
+  html {
+    scroll-behavior: smooth;
+  }
+  /* Respect the OS reduced-motion preference: kill the smooth scroll and
+     clamp any non-essential transitions so reveals stay opacity-only. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 /* Noise overlay for Arthur theme */
@@ -245,4 +264,103 @@
 
 .font-body {
   font-family: var(--font-body);
+}
+
+/* Pac-Man sprite — right-facing wedge cut out via clip-path, mouth opens
+   and closes on a tight loop. Polygon walks: center → top-right edge of
+   mouth → top-right of bounding box → top-left → bottom-left → bottom-right
+   → bottom-right edge of mouth → back to center. Keyframes only swap the
+   two "edge of mouth" points to widen / narrow the wedge. */
+@keyframes pacman-chomp {
+  0%, 100% {
+    clip-path: polygon(
+      50% 50%,
+      100% 49%,
+      100% 0%,
+      0% 0%,
+      0% 100%,
+      100% 100%,
+      100% 51%,
+      50% 50%
+    );
+  }
+  50% {
+    clip-path: polygon(
+      50% 50%,
+      100% 18%,
+      100% 0%,
+      0% 0%,
+      0% 100%,
+      100% 100%,
+      100% 82%,
+      50% 50%
+    );
+  }
+}
+
+.pacman-sprite {
+  /* Smooth (non-stepped) ease so the mouth morphs fluidly, and a touch
+     faster than before. */
+  animation: pacman-chomp 0.24s ease-in-out infinite;
+}
+
+/* Munch pop: each contribution cell gives a quick scale + accent flash the
+   instant Pac-Man eats it. Transform/box-shadow only — the cell's empty
+   background is handled by its inline transition, so the two don't fight. */
+@keyframes cell-munch {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.6);
+    box-shadow: 0 0 9px 2px var(--accent);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.cell-munch {
+  animation: cell-munch 0.28s ease-out;
+}
+
+/* GAME OVER card shown during the end-of-loop pause. */
+@keyframes pacman-gameover-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.pacman-gameover {
+  animation: pacman-gameover-blink 0.7s steps(1, end) infinite;
+  letter-spacing: 0.32em;
+  text-shadow: 0 0 14px var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pacman-sprite {
+    animation: none;
+    clip-path: polygon(
+      50% 50%,
+      100% 30%,
+      100% 0%,
+      0% 0%,
+      0% 100%,
+      100% 100%,
+      100% 70%,
+      50% 50%
+    );
+  }
+  .cell-munch {
+    animation: none;
+  }
+  .pacman-gameover {
+    animation: none;
+  }
 }

@@ -84,11 +84,11 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   return (
     <Wrapper
       {...wrapperProps}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`theme-card relative p-6 transition-all duration-300 hover:-translate-y-0.5 ${hasRepo ? "cursor-pointer block no-underline" : ""}`}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.08 }}
+      className={`theme-card relative p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.45)] ${hasRepo ? "cursor-pointer block no-underline" : ""}`}
       style={{
         borderColor: "var(--border-faint)",
       }}
@@ -130,7 +130,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         {project.stack.map((tech) => (
           <span
             key={tech}
-            className="px-2 py-1 text-xs font-medium uppercase tracking-wider border"
+            className="px-2 py-1 text-xs font-medium uppercase tracking-wider border transition-transform duration-150 ease-out hover:-translate-y-0.5"
             style={{
               borderColor: "var(--border-faint)",
               color: "var(--text-muted)",
