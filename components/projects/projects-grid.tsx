@@ -10,6 +10,7 @@ interface Project {
   github: string
   demo?: string
   planned?: boolean
+  badges?: string[]
 }
 
 const shippedProjects: Project[] = [
@@ -30,6 +31,13 @@ const shippedProjects: Project[] = [
     description: "Earlier heuristic predecessor of Freight Doc Matcher. Python CLI that matches Bills of Lading to Rate Confirmations across 13 brokers via a hybrid Tesseract + Claude extraction pipeline and a 100-point additive scorer. Outputs hyperlinked Excel.",
     stack: ["Python", "Claude API", "Tesseract", "openpyxl", "pdfplumber"],
     github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR"
+  },
+  {
+    title: "Lodestar",
+    description: "Offline Android survival copilot for the Qualcomm x Meta ExecuTorch Hackathon. Jetpack Compose UI over deterministic triage, spoof-aware navigation, hospital guidance, and on-device Qwen inference on Snapdragon.",
+    stack: ["Kotlin", "Jetpack Compose", "ExecuTorch", "QNN", "Android"],
+    github: "https://github.com/arpan-s-dev/QCOM",
+    badges: ["🏆 Copilot-Powered Build Award", "🚀 Qualcomm x Meta Hackathon", "📱 100% Offline"]
   }
 ]
 
@@ -116,6 +124,25 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       >
         {project.title}
       </h3>
+
+      {project.badges && project.badges.length > 0 ? (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {project.badges.map((badge) => (
+            <span
+              key={badge}
+              className="theme-badge px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+              style={{
+                backgroundColor: "var(--bg-elevated)",
+                color: "var(--accent)",
+                border: "1px solid var(--border-faint)",
+                borderRadius: "var(--radius-theme)"
+              }}
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
+      ) : null}
 
       {/* Description */}
       <p

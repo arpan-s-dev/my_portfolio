@@ -481,6 +481,45 @@ const freightMatcherSequence = `sequenceDiagram
     User->>WH: matcher analytics build / export
     WH-->>User: DuckDB views + Parquet for Tableau/Power BI`
 
+const lodestarDiagram = `flowchart TB
+    subgraph Device["Galaxy S25 Ultra<br/>airplane mode"]
+        UI["Jetpack Compose<br/>SafeGuide shell"]
+        VM["MainViewModel<br/>shared state"]
+        DEMO["Demo scenarios<br/>judge-safe flows"]
+    end
+
+    subgraph Triage["Offline assistance"]
+        SAFE["SafetyTree<br/>deterministic severity"]
+        ORCH["TriageOrchestrator"]
+        AI["Qwen3 on Snapdragon NPU<br/>ExecuTorch + QNN"]
+    end
+
+    subgraph Orient["Spoof-aware orientation"]
+        POS["PositionStateMachine<br/>GPS trust state"]
+        SOL["SolarCompass<br/>day heading"]
+        STAR["StarNavigationPipeline<br/>night-sky solve"]
+        SPOOF{"GPS spoofed?"}
+    end
+
+    subgraph Support["Offline data + actions"]
+        HOSP["HospitalFinder<br/>bundled SF JSON"]
+        MED["Medical help<br/>field kit + wound checks"]
+        COMM["Translate + SOS helper"]
+    end
+
+    UI --> VM
+    DEMO --> VM
+    VM --> SAFE
+    SAFE --> ORCH
+    ORCH --> AI
+    VM --> POS
+    POS --> SPOOF
+    SPOOF -->|No| SOL
+    SPOOF -->|Yes| STAR
+    VM --> HOSP
+    VM --> MED
+    VM --> COMM`
+
 const architectureProjects: ArchitectureProject[] = [
   {
     id: "load-board",
@@ -681,10 +720,72 @@ const architectureProjects: ArchitectureProject[] = [
         "Power BI / Tableau template workbooks shipped alongside the Parquet exports"
       ]
     }
+  },
+  {
+    id: "lodestar",
+    title: "Lodestar",
+    tags: ["Edge AI", "Android", "Hackathon Winner"],
+    description: "Offline Android survival copilot built for the Qualcomm x Meta ExecuTorch Hackathon. It combines deterministic first-aid triage, spoof-aware orientation, offline hospital guidance, and an on-device Qwen path on Snapdragon hardware.",
+    github: "https://github.com/arpan-s-dev/QCOM",
+    stats: [
+      { label: "Tracked Files", value: "112", icon: BarChart3 },
+      { label: "Main Kotlin Files", value: "46", icon: Zap },
+      { label: "Test Files", value: "8", icon: TrendingUp },
+      { label: "Offline Demo Assets", value: "12", icon: Activity }
+    ],
+    category: "Edge AI",
+    systemDesignDiagram: lodestarDiagram,
+    techStack: [
+      { layer: "App Platform", choice: "Kotlin + Jetpack Compose", why: "Native Android gave direct access to sensors, mic, and location while keeping the UI fast and field-ready." },
+      { layer: "On-Device Inference", choice: "ExecuTorch `v1.0.0` + Qualcomm QNN", why: "Targets Snapdragon NPU execution locally instead of depending on a cloud model path." },
+      { layer: "Model Runtime", choice: "Qwen3 hybrid `.pte` on SM8750", why: "Aligns the assistant pipeline with the Galaxy S25 Ultra demo hardware and the hackathon's edge-AI focus." },
+      { layer: "Safety Logic", choice: "Deterministic `SafetyTree`", why: "Severity is computed before any generation so the highest-risk decision stays explainable and reproducible." },
+      { layer: "Orientation", choice: "Solar compass + star solver + spoof detection", why: "Builds resilient heading recovery for cases where GPS is unavailable, untrusted, or intentionally spoofed." },
+      { layer: "Offline Data", choice: "Bundled JSON assets", why: "Hospitals, field-kit references, and corpus data ship inside the app, matching the no-`INTERNET` constraint." }
+    ],
+    implementation: [
+      {
+        heading: "Offline-First By Constraint, Not Marketing",
+        body: [
+          "The app intentionally declares no `INTERNET` permission. That forces every user-facing flow to work with local assets, device sensors, and on-device logic rather than quietly falling back to cloud APIs.",
+          "That constraint shapes the whole architecture: hospital lookup uses bundled JSON, triage runs through `SafetyTree`, and the assistant path only upgrades when the local Qwen runtime is available."
+        ]
+      },
+      {
+        heading: "Deterministic Triage Before Model Output",
+        body: [
+          "`MainViewModel` routes emergency prompts through `SafetyTree` first, then into `TriageOrchestrator`. This preserves a stable severity label even when the NPU model is warming up, missing, or replaced with a safe stub during demos.",
+          "That separation is important for a safety-focused app because the system's highest-risk decision is never delegated entirely to free-form generation."
+        ]
+      },
+      {
+        heading: "Spoof-Aware Orientation Stack",
+        body: [
+          "The navigation path does more than read GPS. `PositionStateMachine` tracks trust state, `SolarCompass` recovers heading in daytime, and `StarNavigationPipeline` handles staged night-sky recovery with a bundled bright-star catalog.",
+          "When spoofing is detected, the app can freeze to the last trusted position and surface that downgrade visibly instead of acting on bad coordinates."
+        ]
+      },
+      {
+        heading: "Hackathon Demo Reliability",
+        body: [
+          "Demo scenarios are built into the product so judges can see specific offline flows quickly: negation-aware triage, Powell Street hospital guidance, STAR_FIX night-sky recovery, and a wound-photo checklist.",
+          "That makes the product presentation honest and repeatable under hackathon conditions where networking, lighting, and timing are unpredictable."
+        ]
+      }
+    ],
+    outcomes: {
+      status: "Built for the Qualcomm x Meta ExecuTorch Hackathon and recognized with GitHub's `Copilot-Powered Build Award` for creative and effective use of GitHub Copilot. The repo already includes real device screenshots, demo scripts, and the on-device Android shell.",
+      roadmap: [
+        "Finish full end-to-end validation of the Qwen NPU path on the target Galaxy S25 Ultra device",
+        "Expand the offline hospital dataset beyond the current San Francisco scope",
+        "Replace the current wound-photo guided checklist with a true on-device vision assessment path",
+        "Broaden the trust-state navigation system into more generalized field-routing and incident workflows"
+      ]
+    }
   }
 ]
 
-const filterOptions = ["All", "Microservices", "AI Pipelines", "Full-Stack"]
+const filterOptions = ["All", "Microservices", "AI Pipelines", "Full-Stack", "Edge AI"]
 
 function ArchitectureCard({ project, index }: { project: ArchitectureProject; index: number }) {
   const { theme } = useTheme()
