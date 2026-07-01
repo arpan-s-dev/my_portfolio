@@ -66,8 +66,8 @@
   --bg-base: #0a0a0a;
   --bg-card: #141414;
   --bg-elevated: #1a1a1a;
-  --text-primary: #ffffff;
-  --text-muted: #888888;
+  --text-primary: #f3edf8;
+  --text-muted: #b0a9ba;
   --accent: #a855f7;
   --accent-secondary: #06b6d4;
   --border-faint: #262626;
@@ -76,7 +76,7 @@
   /* Map colors */
   --map-stroke: #06b6d4;
   --map-pin: #a855f7;
-  --map-label: #ffffff;
+  --map-label: #f3edf8;
   
   /* Gradient colors */
   --gradient-start: #a855f7;
@@ -89,19 +89,19 @@
   
   /* shadcn compatibility */
   --background: #0a0a0a;
-  --foreground: #ffffff;
+  --foreground: #f3edf8;
   --card: #141414;
-  --card-foreground: #ffffff;
+  --card-foreground: #f3edf8;
   --popover: #141414;
-  --popover-foreground: #ffffff;
+  --popover-foreground: #f3edf8;
   --primary: #a855f7;
-  --primary-foreground: #ffffff;
+  --primary-foreground: #f3edf8;
   --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
+  --secondary-foreground: #f3edf8;
   --muted: #1a1a1a;
-  --muted-foreground: #888888;
+  --muted-foreground: #b0a9ba;
   --accent: #a855f7;
-  --accent-foreground: #ffffff;
+  --accent-foreground: #f3edf8;
   --border: #262626;
   --input: #262626;
   --ring: #a855f7;
@@ -137,6 +137,12 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+@property --profile-border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -162,6 +168,71 @@
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .profile-card-sweep {
+      animation: profile-card-sweep 7.5s ease-in-out infinite !important;
+    }
+
+    .profile-card-shell::before {
+      animation: profile-border-spin 7s linear infinite !important;
+    }
+
+    .profile-avatar-ring {
+      animation: profile-avatar-float 5.2s ease-in-out infinite !important;
+    }
+
+    .profile-avatar-ring::before {
+      animation: profile-avatar-ring 16s linear infinite !important;
+    }
+
+    .profile-avatar-ring::after {
+      animation: profile-avatar-orbit 5.5s linear infinite !important;
+    }
+
+    .profile-online-dot {
+      animation: profile-online-pulse 2s ease-out infinite !important;
+    }
+
+    .profile-title-shimmer {
+      animation: profile-title-shimmer 4.6s ease-in-out infinite !important;
+    }
+
+    .profile-tagline-drift {
+      animation: profile-text-drift 5.4s ease-in-out infinite !important;
+    }
+
+    .profile-focus-line {
+      animation: profile-focus-glow 4.2s ease-in-out infinite !important;
+    }
+
+    .profile-cta-pulse {
+      animation: profile-cta-pulse 2.8s ease-in-out infinite !important;
+    }
+
+    .animated-mermaid-diagram svg .edgePath path,
+    .animated-mermaid-diagram svg path.flowchart-link,
+    .animated-mermaid-diagram svg .relation,
+    .animated-mermaid-diagram svg .messageLine0,
+    .animated-mermaid-diagram svg .messageLine1,
+    .animated-mermaid-diagram svg .loopLine {
+      animation: mermaid-dash-flow 1.05s linear infinite !important;
+      animation-duration: 1.05s !important;
+      animation-iteration-count: infinite !important;
+    }
+
+    .animated-mermaid-diagram svg .node rect,
+    .animated-mermaid-diagram svg .node polygon,
+    .animated-mermaid-diagram svg .node circle,
+    .animated-mermaid-diagram svg .node ellipse,
+    .animated-mermaid-diagram svg .classGroup rect,
+    .animated-mermaid-diagram svg .actor,
+    .animated-mermaid-diagram svg .cluster rect {
+      animation: mermaid-node-pulse 3s ease-in-out infinite !important;
+      animation-duration: 3s !important;
+      animation-iteration-count: infinite !important;
     }
   }
 }
@@ -193,7 +264,7 @@
   pointer-events: none;
   z-index: -1;
   opacity: 0.05;
-  background-image: radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, #f3edf8 1px, transparent 0);
   background-size: 40px 40px;
 }
 
@@ -220,9 +291,228 @@
 
 /* Card styles */
 .theme-card {
-  background: var(--bg-card);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
   border: 1px solid var(--border-faint);
   border-radius: var(--radius-theme);
+  backdrop-filter: blur(8px);
+}
+
+@keyframes profile-card-sweep {
+  0% {
+    transform: translateX(-120%) rotate(12deg);
+    opacity: 0;
+  }
+  22%,
+  48% {
+    opacity: 0.34;
+  }
+  100% {
+    transform: translateX(140%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes profile-avatar-ring {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes profile-avatar-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.015);
+  }
+}
+
+@keyframes profile-online-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  }
+  55% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+}
+
+@keyframes profile-title-shimmer {
+  0%,
+  100% {
+    text-shadow: 0 0 0 transparent;
+  }
+  50% {
+    text-shadow:
+      0 0 14px color-mix(in srgb, var(--accent) 42%, transparent),
+      0 0 28px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+}
+
+@keyframes profile-text-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.84;
+  }
+  50% {
+    transform: translateY(-2px);
+    opacity: 1;
+  }
+}
+
+@keyframes profile-focus-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 28%, transparent));
+  }
+}
+
+.profile-card-shell {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 8%, transparent),
+    0 0 34px color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.profile-card-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background:
+    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+    conic-gradient(
+      from var(--profile-border-angle, 0deg),
+      transparent,
+      color-mix(in srgb, var(--accent) 72%, transparent),
+      transparent 34%
+    ) border-box;
+  opacity: 0.62;
+  animation: profile-border-spin 7s linear infinite;
+}
+
+.profile-card-sweep {
+  position: absolute;
+  inset: -28% auto -28% -22%;
+  width: 34%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 24%, transparent),
+    transparent
+  );
+  filter: blur(18px);
+  animation: profile-card-sweep 7.5s ease-in-out infinite;
+}
+
+.profile-card-orb {
+  position: absolute;
+  width: 12rem;
+  height: 12rem;
+  pointer-events: none;
+  border-radius: 9999px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent), transparent 68%);
+  filter: blur(18px);
+  opacity: 0.42;
+}
+
+.profile-card-orb-one {
+  top: -5rem;
+  right: -4rem;
+}
+
+.profile-card-orb-two {
+  bottom: 3rem;
+  left: -6rem;
+  opacity: 0.24;
+}
+
+.profile-avatar-ring {
+  animation: profile-avatar-float 5.2s ease-in-out infinite;
+  box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.profile-avatar-ring::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  border: 1px dashed color-mix(in srgb, var(--accent) 70%, transparent);
+  animation: profile-avatar-ring 16s linear infinite;
+  opacity: 0.72;
+}
+
+.profile-avatar-ring::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  background: var(--accent);
+  box-shadow:
+    0 0 10px var(--accent),
+    0 0 24px color-mix(in srgb, var(--accent) 55%, transparent);
+  transform-origin: 0 89px;
+  animation: profile-avatar-orbit 5.5s linear infinite;
+}
+
+.profile-avatar-frame {
+  box-shadow: inset 0 0 22px color-mix(in srgb, var(--bg-base) 45%, transparent);
+}
+
+.profile-online-dot {
+  animation: profile-online-pulse 2s ease-out infinite;
+}
+
+.profile-title-shimmer {
+  animation: profile-title-shimmer 4.6s ease-in-out infinite;
+}
+
+.profile-tagline-drift {
+  animation: profile-text-drift 5.4s ease-in-out infinite;
+}
+
+.profile-focus-line {
+  animation: profile-focus-glow 4.2s ease-in-out infinite;
+}
+
+.profile-bio {
+  text-wrap: pretty;
+}
+
+.profile-cta-pulse {
+  animation: profile-cta-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes profile-border-spin {
+  to {
+    --profile-border-angle: 360deg;
+  }
+}
+
+@keyframes profile-avatar-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes profile-cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 26%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 22px 2px color-mix(in srgb, var(--accent) 34%, transparent);
+  }
 }
 
 /* Navigation pill */
@@ -257,6 +547,115 @@
   background: linear-gradient(180deg, var(--gradient-start), var(--gradient-end));
 }
 
+@keyframes orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbit-counter-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(-360deg);
+  }
+}
+
+.orbit-spin {
+  animation: orbit-spin 32s linear infinite;
+}
+
+.orbit-counter-spin {
+  animation: orbit-counter-spin 32s linear infinite;
+}
+
+@keyframes mermaid-dash-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+@keyframes mermaid-node-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 24%, transparent));
+  }
+}
+
+@keyframes mermaid-label-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.86;
+  }
+  50% {
+    transform: translateY(-1px);
+    opacity: 1;
+  }
+}
+
+.animated-mermaid-diagram svg {
+  overflow: visible;
+}
+
+.animated-mermaid-diagram svg foreignObject {
+  overflow: visible;
+}
+
+.animated-mermaid-diagram svg text,
+.animated-mermaid-diagram svg tspan,
+.animated-mermaid-diagram svg .nodeLabel,
+.animated-mermaid-diagram svg .edgeLabel,
+.animated-mermaid-diagram svg .messageText,
+.animated-mermaid-diagram svg .loopText,
+.animated-mermaid-diagram svg .label {
+  max-width: 220px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.animated-mermaid-diagram svg .edgeLabel,
+.animated-mermaid-diagram svg .messageText,
+.animated-mermaid-diagram svg .loopText {
+  max-width: 180px;
+}
+
+.animated-mermaid-diagram svg .edgePath path,
+.animated-mermaid-diagram svg path.flowchart-link,
+.animated-mermaid-diagram svg .relation,
+.animated-mermaid-diagram svg .messageLine0,
+.animated-mermaid-diagram svg .messageLine1,
+.animated-mermaid-diagram svg .loopLine {
+  stroke-dasharray: 7 8 !important;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: mermaid-dash-flow 1.05s linear infinite !important;
+}
+
+.animated-mermaid-diagram svg .node rect,
+.animated-mermaid-diagram svg .node polygon,
+.animated-mermaid-diagram svg .node circle,
+.animated-mermaid-diagram svg .classGroup rect,
+.animated-mermaid-diagram svg .actor,
+.animated-mermaid-diagram svg .cluster rect {
+  animation: mermaid-node-pulse 4.8s ease-in-out infinite;
+}
+
+.animated-mermaid-diagram svg .edgeLabel,
+.animated-mermaid-diagram svg .messageText,
+.animated-mermaid-diagram svg .loopText {
+  animation: mermaid-label-float 3.6s ease-in-out infinite;
+}
+
 /* Font classes */
 .font-display {
   font-family: var(--font-display);
@@ -266,54 +665,282 @@
   font-family: var(--font-body);
 }
 
-/* Pac-Man sprite — right-facing wedge cut out via clip-path, mouth opens
-   and closes on a tight loop. Polygon walks: center → top-right edge of
-   mouth → top-right of bounding box → top-left → bottom-left → bottom-right
-   → bottom-right edge of mouth → back to center. Keyframes only swap the
-   two "edge of mouth" points to widen / narrow the wedge. */
-@keyframes pacman-chomp {
-  0%, 100% {
-    clip-path: polygon(
-      50% 50%,
-      100% 49%,
-      100% 0%,
-      0% 0%,
-      0% 100%,
-      100% 100%,
-      100% 51%,
-      50% 50%
-    );
+.boot-intro-shell {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--accent) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 8%, transparent) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.boot-intro-shell > div {
+  position: relative;
+}
+
+.boot-intro-shell > div::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--accent) 5%, transparent) 50%,
+    transparent
+  );
+  background-size: 100% 6px;
+  opacity: 0.28;
+}
+
+.terminal-line-reveal {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: terminal-line-reveal 0.32s ease-out forwards;
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 0.65ch;
+  height: 1em;
+  margin-left: 0.22ch;
+  transform: translateY(0.15em);
+  background: var(--accent);
+  animation: terminal-cursor-blink 0.85s steps(1, end) infinite;
+}
+
+@keyframes terminal-line-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes terminal-cursor-blink {
+  0%,
+  48% {
+    opacity: 1;
+  }
+  49%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes repairman-walk {
+  0%,
+  100% {
+    transform: translateY(0);
   }
   50% {
-    clip-path: polygon(
-      50% 50%,
-      100% 18%,
-      100% 0%,
-      0% 0%,
-      0% 100%,
-      100% 100%,
-      100% 82%,
-      50% 50%
-    );
+    transform: translateY(-1.5px);
   }
 }
 
-.pacman-sprite {
-  /* Smooth (non-stepped) ease so the mouth morphs fluidly, and a touch
-     faster than before. */
-  animation: pacman-chomp 0.24s ease-in-out infinite;
+@keyframes repairman-hammer {
+  0%,
+  100% {
+    transform: rotate(-28deg);
+  }
+  50% {
+    transform: rotate(42deg) translate(1px, 1px);
+  }
 }
 
-/* Munch pop: each contribution cell gives a quick scale + accent flash the
-   instant Pac-Man eats it. Transform/box-shadow only — the cell's empty
-   background is handled by its inline transition, so the two don't fight. */
-@keyframes cell-munch {
-  0% {
+@keyframes wrecker-punch {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.repairman-sprite,
+.wrecker-sprite {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  transform-origin: center;
+}
+
+.repairman-sprite {
+  animation: repairman-walk 0.24s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 7px color-mix(in srgb, var(--accent) 65%, transparent))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--text-primary) 24%, transparent));
+}
+
+.repairman-hat {
+  position: absolute;
+  left: 3px;
+  top: 0;
+  width: 13px;
+  height: 4px;
+  border-radius: 3px 3px 1px 1px;
+  background: linear-gradient(90deg, var(--accent), var(--text-primary));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.repairman-face {
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  width: 9px;
+  height: 8px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text-primary) 86%, var(--accent));
+  box-shadow: inset -2px -1px 0 color-mix(in srgb, var(--bg-base) 20%, transparent);
+}
+
+.repairman-body {
+  position: absolute;
+  left: 4px;
+  bottom: 0;
+  width: 11px;
+  height: 8px;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, transparent 43%, var(--accent) 43% 57%, transparent 57%),
+    var(--bg-elevated);
+}
+
+.repairman-hammer {
+  position: absolute;
+  right: -3px;
+  top: 5px;
+  width: 9px;
+  height: 2px;
+  transform-origin: left center;
+  background: var(--accent);
+  animation: repairman-hammer 0.25s ease-in-out infinite;
+}
+
+.repairman-hammer::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -3px;
+  width: 3px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--text-primary);
+}
+
+.repairman-spark {
+  position: absolute;
+  right: -5px;
+  top: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--accent);
+  box-shadow:
+    0 0 7px var(--accent),
+    -4px 4px 0 -1px color-mix(in srgb, var(--text-primary) 75%, transparent);
+  opacity: 0;
+  animation: repairman-spark 0.5s ease-out infinite;
+}
+
+.wrecker-sprite {
+  filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.6));
+}
+
+.wrecker-head {
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 8px;
+  height: 7px;
+  border-radius: 3px;
+  background: #f43f5e;
+}
+
+.wrecker-body {
+  position: absolute;
+  left: 4px;
+  bottom: 1px;
+  width: 10px;
+  height: 9px;
+  border-radius: 2px;
+  background: color-mix(in srgb, #f43f5e 58%, var(--bg-elevated));
+}
+
+.wrecker-fist {
+  position: absolute;
+  right: -2px;
+  top: 8px;
+  width: 7px;
+  height: 5px;
+  border-radius: 2px;
+  background: #f43f5e;
+  animation: wrecker-punch 0.38s ease-in-out infinite;
+}
+
+@keyframes repairman-boost-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px var(--accent));
     transform: scale(1);
   }
-  35% {
-    transform: scale(1.6);
-    box-shadow: 0 0 9px 2px var(--accent);
+  50% {
+    filter: drop-shadow(0 0 18px var(--accent));
+    transform: scale(1.15);
+  }
+}
+
+.repairman-boost .repairman-sprite {
+  animation:
+    repairman-walk 0.12s ease-in-out infinite,
+    repairman-boost-glow 0.38s ease-in-out infinite;
+}
+
+.repairman-boost .repairman-hammer {
+  animation: repairman-hammer 0.12s ease-in-out infinite;
+}
+
+@keyframes repairman-spark {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.6) translate(0, 0);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1) translate(2px, -2px);
+  }
+}
+
+@keyframes repairman-boost-label {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.94);
+  }
+  20%,
+  78% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(1.04);
+  }
+}
+
+.repairman-boost-label {
+  animation: repairman-boost-label 1.8s ease-out both;
+  letter-spacing: 0.22em;
+  text-shadow: 0 0 12px var(--accent);
+}
+
+@keyframes cell-build {
+  0% {
+    transform: scale(0.4);
+    box-shadow: 0 0 0 0 transparent;
+  }
+  55% {
+    transform: scale(1.35);
+    box-shadow: 0 0 9px 2px color-mix(in srgb, var(--accent) 80%, transparent);
   }
   100% {
     transform: scale(1);
@@ -321,12 +948,70 @@
   }
 }
 
-.cell-munch {
-  animation: cell-munch 0.28s ease-out;
+@keyframes cell-break {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px 2px rgba(244, 63, 94, 0.72);
+  }
+  45% {
+    transform: scale(0.58) rotate(10deg);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
-/* GAME OVER card shown during the end-of-loop pause. */
-@keyframes pacman-gameover-blink {
+.github-contribution-cell {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.github-contribution-cell::before,
+.github-contribution-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.cell-build {
+  animation: cell-build 0.18s ease-out;
+}
+
+.cell-break {
+  animation: cell-break 0.28s ease-out;
+  outline: 1px solid rgba(244, 63, 94, 0.52);
+  outline-offset: -1px;
+}
+
+.cell-break::before {
+  opacity: 0.78;
+  background:
+    linear-gradient(135deg, transparent 0 38%, rgba(244, 63, 94, 0.95) 39% 45%, transparent 46% 100%),
+    linear-gradient(45deg, transparent 0 58%, rgba(15, 23, 42, 0.72) 59% 64%, transparent 65% 100%);
+}
+
+.cell-break::after {
+  animation: cell-wreck-flash 0.42s ease-out;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.82), transparent 62%);
+}
+
+@keyframes cell-wreck-flash {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.55);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes builder-loop-blink {
   0%,
   55% {
     opacity: 1;
@@ -337,30 +1022,27 @@
   }
 }
 
-.pacman-gameover {
-  animation: pacman-gameover-blink 0.7s steps(1, end) infinite;
+.builder-loop-complete {
+  animation: builder-loop-blink 0.7s steps(1, end) infinite;
   letter-spacing: 0.32em;
   text-shadow: 0 0 14px var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pacman-sprite {
-    animation: none;
-    clip-path: polygon(
-      50% 50%,
-      100% 30%,
-      100% 0%,
-      0% 0%,
-      0% 100%,
-      100% 100%,
-      100% 70%,
-      50% 50%
-    );
-  }
-  .cell-munch {
+  .repairman-sprite,
+  .repairman-hammer,
+  .wrecker-fist {
     animation: none;
   }
-  .pacman-gameover {
+  .cell-build,
+  .cell-break {
+    animation: none;
+  }
+  .builder-loop-complete {
+    animation: none;
+  }
+  .repairman-boost .repairman-sprite,
+  .repairman-boost-label {
     animation: none;
   }
 }

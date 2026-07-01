@@ -2,11 +2,23 @@
 
 import { motion } from "framer-motion"
 import { ArchitectureList } from "@/components/architecture/architecture-list"
+import { AnimatedWave } from "@/components/home/animated-wave"
 
 export function ArchitectureSection() {
   return (
-    <section id="architecture" className="scroll-mt-28">
-      <div className="mx-auto max-w-[1200px] px-6 pt-16 pb-16">
+    <section id="architecture" className="relative overflow-hidden scroll-mt-28">
+      <div
+        className="absolute inset-x-0 top-0 h-44"
+        style={{
+          opacity: 0.18,
+          maskImage: "linear-gradient(to bottom, transparent, black 35%, transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent, black 35%, transparent)",
+        }}
+      >
+        <AnimatedWave />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6 pt-16 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}

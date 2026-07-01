@@ -25,13 +25,17 @@ export function ProfileCard() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="theme-card p-6 md:p-8 h-full flex flex-col justify-between gap-8"
+      className="theme-card profile-card-shell relative overflow-hidden p-6 md:p-8 h-full flex flex-col justify-between gap-8"
     >
+      <div className="profile-card-sweep" aria-hidden="true" />
+      <div className="profile-card-orb profile-card-orb-one" aria-hidden="true" />
+      <div className="profile-card-orb profile-card-orb-two" aria-hidden="true" />
+
       {/* Top: headshot + identity */}
-      <div className="flex flex-col items-center text-center">
+      <div className="relative z-10 flex flex-col items-center text-center">
         {/* Headshot */}
         <div
-          className="relative h-[160px] w-[160px] rounded-full p-1 mb-5"
+          className="profile-avatar-ring relative h-[160px] w-[160px] rounded-full p-1 mb-5"
           style={{
             background:
               theme === "arthur"
@@ -40,7 +44,7 @@ export function ProfileCard() {
           }}
         >
           <div
-            className="relative h-full w-full rounded-full overflow-hidden"
+            className="profile-avatar-frame relative h-full w-full rounded-full overflow-hidden"
             style={{ backgroundColor: "var(--bg-elevated)" }}
           >
             <Image
@@ -54,7 +58,7 @@ export function ProfileCard() {
           </div>
           {/* Online indicator */}
           <div
-            className="absolute bottom-3 right-3 h-4 w-4 rounded-full border-4"
+            className="profile-online-dot absolute bottom-3 right-3 h-4 w-4 rounded-full border-4"
             style={{
               backgroundColor: "#22c55e",
               borderColor: "var(--bg-card)",
@@ -64,7 +68,7 @@ export function ProfileCard() {
 
         {/* Name */}
         <h2
-          className="text-2xl md:text-3xl font-semibold mb-2"
+          className="profile-title-shimmer text-2xl md:text-3xl font-semibold mb-2"
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--font-cormorant)",
@@ -75,7 +79,7 @@ export function ProfileCard() {
 
         {/* Tagline - serif italic */}
         <p
-          className="text-sm italic mb-4"
+          className="profile-tagline-drift text-sm italic mb-4"
           style={{
             color: "var(--text-muted)",
             fontFamily: "var(--font-cormorant)",
@@ -86,7 +90,7 @@ export function ProfileCard() {
 
         {/* Focus areas */}
         <p
-          className="text-sm mb-2"
+          className="profile-focus-line text-sm mb-2"
           style={{
             color: "var(--text-primary)",
             fontFamily: "var(--font-inter)",
@@ -111,11 +115,11 @@ export function ProfileCard() {
 
       {/* Middle: bio */}
       <p
-        className="text-sm text-center"
+        className="profile-bio relative z-10 text-sm text-center"
         style={{
           color: "var(--text-muted)",
           fontFamily: "var(--font-inter)",
-          lineHeight: 1.6,
+          lineHeight: 1.7,
         }}
       >
         Building scalable systems and AI solutions. Experience with
@@ -124,11 +128,11 @@ export function ProfileCard() {
       </p>
 
       {/* Bottom: primary CTA */}
-      <div className="flex flex-col">
+      <div className="relative z-10 flex flex-col">
         <a
           href="#projects"
           onClick={handleProjectsClick}
-          className="theme-button inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium border transition-all duration-200 ease-out hover:opacity-80 hover:-translate-y-0.5"
+          className="theme-button profile-cta-pulse inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium border transition-all duration-200 ease-out hover:opacity-80 hover:-translate-y-0.5"
           style={{
             borderColor: "var(--accent)",
             backgroundColor: "var(--accent)",

@@ -18,7 +18,7 @@ export function AIAssistant() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.5, ease: "easeOut", delay: 0.15 }}
-        className="theme-card p-6 h-full cursor-pointer"
+        className="theme-card h-full cursor-pointer p-6"
         onClick={handleClick}
       >
         {/* Header */}

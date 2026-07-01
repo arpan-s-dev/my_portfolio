@@ -44,7 +44,7 @@ export function TerritoryMap() {
           height={559}
           className="w-full max-h-[280px] object-cover"
           style={{ filter: mapFilter }}
-          priority={false}
+          priority
         />
       </div>
 

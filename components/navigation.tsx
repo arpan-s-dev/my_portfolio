@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Sun, Moon } from "lucide-react"
+import { Menu, Moon, Sun, X } from "lucide-react"
 import { motion, useReducedMotion } from "framer-motion"
 import { useTheme } from "@/components/theme-provider"
 import { useCopyEmail } from "@/lib/contact"
@@ -18,10 +18,8 @@ export function Navigation() {
   const prefersReducedMotion = useReducedMotion()
   const [activeId, setActiveId] = useState<string>("home")
   const [scrolled, setScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Sticky-nav tint: cross the 32px threshold and the bar gets a blurred,
-  // tinted background. One scroll listener handles both this and the
-  // active-section default below.
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32)
     onScroll()
@@ -29,12 +27,15 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  // Drive the active nav pill from whichever section is dominant in the
-  // viewport. rootMargin pulls the trigger zone roughly to the middle so
-  // a section lights up when it occupies the central band of the page,
-  // not the moment its top crosses the navbar.
   useEffect(() => {
-    const ids = navItems.map((i) => i.href.slice(1))
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : ""
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
+    const ids = navItems.map((item) => item.href.slice(1))
     const elements = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null)
@@ -44,8 +45,9 @@ export function Navigation() {
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
-          .filter((e) => e.isIntersecting)
+          .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+
         if (visible[0]) setActiveId(visible[0].target.id)
       },
       {
@@ -63,6 +65,7 @@ export function Navigation() {
     href: string
   ) => {
     e.preventDefault()
+    setMobileMenuOpen(false)
     const id = href.slice(1)
     const el = document.getElementById(id)
     if (!el) return
@@ -75,97 +78,182 @@ export function Navigation() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 px-6 py-4 transition-[background-color,backdrop-filter,border-color] duration-300 ease-out"
-      style={{
-        backgroundColor: scrolled
-          ? "color-mix(in srgb, var(--bg-base) 75%, transparent)"
-          : "transparent",
-        backdropFilter: scrolled ? "blur(12px) saturate(140%)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(12px) saturate(140%)" : "none",
-        borderBottom: scrolled
-          ? "1px solid var(--border-faint)"
-          : "1px solid transparent",
-      }}
+      className={`fixed z-50 transition-all duration-500 ${
+        scrolled || mobileMenuOpen
+          ? "top-4 left-4 right-4"
+          : "top-0 left-0 right-0"
+      }`}
     >
-      <nav className="mx-auto flex max-w-[1200px] items-center justify-between">
-        {/* Logo */}
-        <a
-          href="#home"
-          onClick={(e) => handleNavClick(e, "#home")}
-          className="font-display text-xl font-semibold"
-          style={{ color: "var(--text-primary)" }}
-        >
-          arpan.sdev
-        </a>
-
-        {/* Center Nav Pills */}
+      <nav
+        className={`mx-auto transition-all duration-500 ${
+          scrolled || mobileMenuOpen
+            ? "max-w-[1200px] border"
+            : "max-w-[1360px] border border-transparent"
+        }`}
+        style={{
+          borderColor: scrolled || mobileMenuOpen ? "var(--border-faint)" : "transparent",
+          borderRadius:
+            scrolled || mobileMenuOpen ? "calc(var(--radius-theme) + 12px)" : "0px",
+          backgroundColor:
+            scrolled || mobileMenuOpen
+              ? "color-mix(in srgb, var(--bg-base) 82%, transparent)"
+              : "transparent",
+          backdropFilter:
+            scrolled || mobileMenuOpen ? "blur(16px) saturate(150%)" : "none",
+          WebkitBackdropFilter:
+            scrolled || mobileMenuOpen ? "blur(16px) saturate(150%)" : "none",
+          boxShadow:
+            scrolled || mobileMenuOpen
+              ? "0 18px 60px -28px rgba(0, 0, 0, 0.55)"
+              : "none",
+        }}
+      >
         <div
-          className="nav-pill flex items-center gap-1 border px-1 py-1"
-          style={{
-            borderColor: "var(--border-faint)",
-            backgroundColor: "var(--bg-card)",
-          }}
+          className={`flex items-center justify-between px-4 sm:px-6 lg:px-8 transition-all duration-500 ${
+            scrolled ? "h-16" : "h-20"
+          }`}
         >
-          {navItems.map((item) => {
-            const isActive = activeId === item.href.slice(1)
+          <a
+            href="#home"
+            onClick={(e) => handleNavClick(e, "#home")}
+            className={`font-display font-semibold tracking-tight transition-all duration-500 ${
+              scrolled ? "text-xl" : "text-2xl"
+            }`}
+            style={{ color: "var(--text-primary)" }}
+          >
+            arpan.sdev
+          </a>
 
-            return (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={(e) => handleNavClick(e, item.href)}
-                className="nav-pill relative px-4 py-2 text-sm font-medium transition-colors"
-                style={{
-                  color: isActive ? "var(--text-primary)" : "var(--text-muted)",
-                  backgroundColor: isActive ? "var(--bg-elevated)" : "transparent",
-                }}
-              >
-                {item.label}
-              </a>
-            )
-          })}
-
-          {/* Mail: copies email to clipboard, flashes "Copied" for 2s */}
-          <button
-            type="button"
-            onClick={copyEmail}
-            aria-label={mailCopied ? "Email copied to clipboard" : "Copy email address"}
-            className="nav-pill relative px-4 py-2 text-sm font-medium transition-colors min-w-[64px]"
+          <div
+            className="nav-pill hidden items-center gap-1 border px-1 py-1 md:flex"
             style={{
-              color: mailCopied ? "var(--accent)" : "var(--text-muted)",
-              backgroundColor: "transparent",
+              borderColor: "var(--border-faint)",
+              backgroundColor: "var(--bg-card)",
             }}
           >
-            <span aria-live="polite">{mailCopied ? "Copied" : "Mail"}</span>
-          </button>
-        </div>
+            {navItems.map((item) => {
+              const isActive = activeId === item.href.slice(1)
 
-        {/* Theme Toggle */}
-        <motion.button
-          onClick={toggleTheme}
-          className="theme-button flex h-10 w-10 items-center justify-center border transition-colors"
-          style={{
-            borderColor: "var(--border-faint)",
-            backgroundColor: "var(--bg-card)",
-            color: "var(--text-muted)",
-          }}
-          whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
-          whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
-          title="Switch theme"
-        >
-          {theme === "arthur" ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Moon className="h-5 w-5" />
-          )}
-        </motion.button>
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className="nav-pill relative px-4 py-2 text-sm font-medium transition-colors"
+                  style={{
+                    color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                    backgroundColor: isActive ? "var(--bg-elevated)" : "transparent",
+                  }}
+                >
+                  {item.label}
+                </a>
+              )
+            })}
+
+            <button
+              type="button"
+              onClick={copyEmail}
+              aria-label={mailCopied ? "Email copied to clipboard" : "Copy email address"}
+              className="nav-pill relative min-w-[68px] px-4 py-2 text-sm font-medium transition-colors"
+              style={{
+                color: mailCopied ? "var(--accent)" : "var(--text-muted)",
+                backgroundColor: "transparent",
+              }}
+            >
+              <span aria-live="polite">{mailCopied ? "Copied" : "Mail"}</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <motion.button
+              onClick={toggleTheme}
+              className="theme-button flex h-10 w-10 items-center justify-center border transition-colors"
+              style={{
+                borderColor: "var(--border-faint)",
+                backgroundColor: "var(--bg-card)",
+                color: "var(--text-muted)",
+              }}
+              whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
+              title="Switch theme"
+            >
+              {theme === "arthur" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </motion.button>
+
+            <button
+              type="button"
+              className="theme-button flex h-10 w-10 items-center justify-center border md:hidden"
+              style={{
+                borderColor: "var(--border-faint)",
+                backgroundColor: "var(--bg-card)",
+                color: "var(--text-primary)",
+              }}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
       </nav>
 
-      {/* Divider line */}
       <div
-        className="mx-auto mt-4 max-w-[1200px] h-px"
-        style={{ backgroundColor: "var(--accent)" }}
-      />
+        className={`mx-auto mt-3 max-w-[1200px] transition-all duration-300 md:hidden ${
+          mobileMenuOpen
+            ? "pointer-events-auto opacity-100 translate-y-0"
+            : "pointer-events-none opacity-0 -translate-y-2"
+        }`}
+      >
+        <div
+          className="theme-card p-3"
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--bg-base) 88%, transparent)",
+            backdropFilter: "blur(18px) saturate(150%)",
+            WebkitBackdropFilter: "blur(18px) saturate(150%)",
+            boxShadow: "0 18px 60px -28px rgba(0, 0, 0, 0.55)",
+          }}
+        >
+          <div className="flex flex-col gap-2">
+            {navItems.map((item) => {
+              const isActive = activeId === item.href.slice(1)
+
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
+                  className="nav-pill px-4 py-3 text-sm font-medium transition-colors"
+                  style={{
+                    color: isActive ? "var(--text-primary)" : "var(--text-muted)",
+                    backgroundColor: isActive ? "var(--bg-elevated)" : "transparent",
+                  }}
+                >
+                  {item.label}
+                </a>
+              )
+            })}
+
+            <button
+              type="button"
+              onClick={() => {
+                copyEmail()
+                setMobileMenuOpen(false)
+              }}
+              className="nav-pill px-4 py-3 text-left text-sm font-medium transition-colors"
+              style={{
+                color: mailCopied ? "var(--accent)" : "var(--text-muted)",
+                backgroundColor: "transparent",
+              }}
+            >
+              {mailCopied ? "Email copied" : "Copy email"}
+            </button>
+          </div>
+        </div>
+      </div>
     </header>
   )
 }

@@ -37,23 +37,23 @@ const arthurThemeVars = {
 const atieThemeVars = {
   background: "#141414",
   primaryColor: "#1a1a1a",
-  primaryTextColor: "#ffffff",
+  primaryTextColor: "#f3edf8",
   primaryBorderColor: "#a855f7",
   secondaryColor: "#0a0a0a",
-  secondaryTextColor: "#ffffff",
+  secondaryTextColor: "#f3edf8",
   secondaryBorderColor: "#262626",
   tertiaryColor: "#0a0a0a",
-  tertiaryTextColor: "#ffffff",
+  tertiaryTextColor: "#f3edf8",
   tertiaryBorderColor: "#262626",
   lineColor: "#06b6d4",
-  textColor: "#ffffff",
+  textColor: "#f3edf8",
   mainBkg: "#1a1a1a",
   nodeBorder: "#a855f7",
   clusterBkg: "#0a0a0a",
   clusterBorder: "#a855f7",
   edgeLabelBackground: "#141414",
   noteBkgColor: "#1a1a1a",
-  noteTextColor: "#ffffff",
+  noteTextColor: "#f3edf8",
   noteBorderColor: "#a855f7",
   fontFamily: "var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace",
   fontSize: "14px",
@@ -61,6 +61,98 @@ const atieThemeVars = {
 
 interface MermaidDiagramProps {
   chart: string
+}
+
+function getMermaidAnimationStyles(svgId: string) {
+  const root = `#${svgId}`
+
+  return `
+<style>
+@keyframes mermaidFlow {
+  to { stroke-dashoffset: -72; }
+}
+@keyframes mermaidArrowPulse {
+  0%, 100% { opacity: 0.62; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+@keyframes mermaidNodePulse {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); opacity: 0.9; }
+  50% { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 38%, transparent)); opacity: 1; }
+}
+@keyframes mermaidLabelGlow {
+  0%, 100% { opacity: 0.86; }
+  50% { opacity: 1; }
+}
+${root} {
+  overflow: visible;
+}
+${root} foreignObject {
+  overflow: visible;
+}
+${root} text,
+${root} tspan,
+${root} .nodeLabel,
+${root} .edgeLabel,
+${root} .messageText,
+${root} .loopText,
+${root} .label {
+  font-size: 12px;
+  max-width: 220px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.25;
+}
+${root} .classGroup text {
+  font-size: 11px;
+}
+${root} .edgeLabel,
+${root} .messageText,
+${root} .loopText {
+  font-size: 11px;
+  max-width: 180px;
+}
+${root} .edgePath path,
+${root} path.flowchart-link,
+${root} .relation,
+${root} .messageLine0,
+${root} .messageLine1,
+${root} .loopLine {
+  stroke-dasharray: 7 8 !important;
+  stroke-dashoffset: 0;
+  stroke-linecap: round !important;
+  animation: mermaidFlow 1.05s linear infinite !important;
+}
+${root} marker path,
+${root} .arrowheadPath,
+${root} .marker {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mermaidArrowPulse 0.95s ease-in-out infinite !important;
+}
+${root} .node rect,
+${root} .node polygon,
+${root} .node circle,
+${root} .node ellipse,
+${root} .classGroup rect,
+${root} .actor,
+${root} .cluster rect,
+${root} .note,
+${root} .labelBox {
+  animation: mermaidNodePulse 3s ease-in-out infinite !important;
+}
+${root} .edgeLabel,
+${root} .messageText,
+${root} .loopText,
+${root} .label,
+${root} .nodeLabel {
+  animation: mermaidLabelGlow 2.6s ease-in-out infinite !important;
+}
+</style>`
+}
+
+function withAnimatedMermaidStyles(svg: string, svgId: string) {
+  return svg.replace(/<svg\b([^>]*)>/, `<svg$1>${getMermaidAnimationStyles(svgId)}`)
 }
 
 export function MermaidDiagram({ chart }: MermaidDiagramProps) {
@@ -94,7 +186,7 @@ export function MermaidDiagram({ chart }: MermaidDiagramProps) {
 
         const { svg: rendered } = await mermaid.render(renderId, chart)
         if (!cancelled) {
-          setSvg(rendered)
+          setSvg(withAnimatedMermaidStyles(rendered, renderId))
           setError(null)
         }
       } catch (err) {
@@ -136,7 +228,7 @@ export function MermaidDiagram({ chart }: MermaidDiagramProps) {
 
   return (
     <div
-      className="w-full overflow-x-auto p-4 [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:mx-auto [&_svg]:block"
+      className="animated-mermaid-diagram w-full overflow-x-auto p-4 [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:mx-auto [&_svg]:block"
       // Diagram is trusted, statically defined source — safe to inject as HTML.
       dangerouslySetInnerHTML={{ __html: svg }}
     />

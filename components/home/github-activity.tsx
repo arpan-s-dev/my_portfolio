@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { motion, useReducedMotion } from "framer-motion"
+import { motion } from "framer-motion"
 import { ExternalLink } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
 import type { ContributionData, ContributionLevel } from "@/lib/github-contributions"
@@ -19,11 +19,14 @@ const NUM_DAYS = 7
 const SPRITE = 18
 const OFFSET = (CELL - SPRITE) / 2 // center the sprite on a cell
 // Constant travel speed in px/ms, so a far block takes proportionally
-// longer to reach than a near one — Pac-Man visibly glides toward each
-// target instead of teleporting. ~120px/s — brisk but readable.
+// longer to reach than a near one. ~120px/s keeps the builder readable.
 const SPEED_PX_PER_MS = 0.12
 const EAT_DWELL_MS = 0 // no pause — continuous glide reads smoother
-const PAUSE_MS = 1900 // GAME OVER beat before the grid refills
+const PAUSE_MS = 1900 // end-of-loop beat before the grid refills
+const WRECKER_DELAY_MS = 2200
+const BOOST_EVERY_MS = 8500
+const BOOST_MS = 1400
+const BOOST_MULTIPLIER = 1.65
 
 // Gold-on-warm-brown (Arthur) / purple-on-near-black (Atie) cell stops.
 // Same calm palette the snake reference used. Index 0 = empty cell.
@@ -44,21 +47,25 @@ const HEATMAP_COLORS = {
   ],
 } as const
 
-// Pac-Man critter: solid circle in --accent with a right-facing wedge cut
-// out via clip-path. The wedge keyframes open↔closed (the wakka chomp). The
-// parent wrapper handles travel + facing direction via transform.
-function PacmanSprite() {
+function RepairmanSprite() {
   return (
-    <div
-      aria-hidden="true"
-      className="pacman-sprite"
-      style={{
-        width: SPRITE,
-        height: SPRITE,
-        backgroundColor: "var(--accent)",
-        borderRadius: "50%",
-      }}
-    />
+    <div aria-hidden="true" className="repairman-sprite">
+      <span className="repairman-hat" />
+      <span className="repairman-face" />
+      <span className="repairman-body" />
+      <span className="repairman-hammer" />
+      <span className="repairman-spark" />
+    </div>
+  )
+}
+
+function WreckerSprite() {
+  return (
+    <div aria-hidden="true" className="wrecker-sprite">
+      <span className="wrecker-head" />
+      <span className="wrecker-body" />
+      <span className="wrecker-fist" />
+    </div>
   )
 }
 
@@ -69,10 +76,10 @@ interface PathCell {
   y: number
 }
 
-// Build the eating order: only cells that actually have contributions
-// (level ≥ 1 — empties are invisible to eat), grouped by density ascending
-// so Pac-Man clears the faintest cells first and saves the brightest for
-// last. Within each density tier he goes to the NEAREST remaining block
+// Build the repair route: only cells that actually have contributions
+// (level ≥ 1 — empties are ignored), grouped by density ascending
+// so the repairman builds the faintest cells first and saves the brightest for
+// last. Within each density tier, he goes to the NEAREST remaining block
 // next (greedy nearest-neighbour from his current spot), so travel reads
 // as deliberate "head to that block, then the next one over" motion rather
 // than random darting across the board.
@@ -114,13 +121,13 @@ interface PathNode {
   x: number
   y: number
   // Index into the ordered block list when this node is a contribution to
-  // eat, or -1 when it's just an L-corner Pac-Man turns at en route.
+  // build, or -1 when it's just an L-corner the sprites turn at en route.
   block: number
 }
 
 // Expand the block list into grid-aligned moves. Between two blocks that
 // differ on both axes, insert a corner (horizontal-first, then vertical)
-// so every segment is purely horizontal or vertical — Pac-Man only ever
+// so every segment is purely horizontal or vertical — sprites only ever
 // moves up / down / left / right, never diagonally.
 function buildNodes(blocks: PathCell[]): PathNode[] {
   if (blocks.length === 0) return []
@@ -137,9 +144,9 @@ function buildNodes(blocks: PathCell[]): PathNode[] {
 }
 
 interface Anim {
-  legEnd: number[] // cumulative time Pac-Man finishes with node i
+  legEnd: number[] // cumulative time the repairman finishes with node i
   loopMs: number // full cycle incl. the end pause
-  // coverIndex[w][d] = order in which Pac-Man's body first passes over that
+  // coverIndex[w][d] = order in which a sprite first passes over that
   // filled cell (-1 = never touched). passTimes[k] = the time that happens.
   // Both are monotonic in travel order, so the render only needs a single
   // "cells covered so far" count.
@@ -148,11 +155,10 @@ interface Anim {
 }
 
 // Walk the grid-aligned route and record the timing of two things: when
-// Pac-Man finishes each node (for positioning), and when his body first
-// passes over each FILLED cell along the way (for eating). Because every
+// the repairman finishes each node (for positioning), and when a sprite first
+// passes over each FILLED cell along the way. Because every
 // segment runs along a grid line through cell centres, any contribution
-// block under his lane is eaten as he crosses it — he never glides over an
-// un-eaten block.
+// block under the lane is touched as the sprites cross it.
 function buildAnim(
   nodes: PathNode[],
   weeks: ContributionData["weeks"],
@@ -167,7 +173,7 @@ function buildAnim(
 
   const mark = (w: number, d: number, time: number) => {
     if (w < 0 || w >= weekCount || d < 0 || d >= NUM_DAYS) return
-    if ((weeks[w]?.[d]?.level ?? 0) < 1) return // empties aren't visibly eaten
+    if ((weeks[w]?.[d]?.level ?? 0) < 1) return // empties aren't visibly touched
     if (coverIndex[w][d] !== -1) return // first crossing wins
     coverIndex[w][d] = coverN++
     passTimes.push(time)
@@ -196,12 +202,11 @@ function buildAnim(
     legEnd[i] = t
   }
 
-  return { legEnd, loopMs: t + PAUSE_MS, coverIndex, passTimes }
+  return { legEnd, loopMs: t + WRECKER_DELAY_MS + PAUSE_MS, coverIndex, passTimes }
 }
 
 export function GitHubActivity({ contributions, username }: GitHubActivityProps) {
   const { theme } = useTheme()
-  const prefersReducedMotion = useReducedMotion()
 
   const palette = HEATMAP_COLORS[theme]
   const getColor = (level: ContributionLevel) => palette[level]
@@ -218,71 +223,101 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
     [nodes, contributions.weeks, weekCount]
   )
 
-  const pacRef = useRef<HTMLDivElement>(null)
-  // How many filled cells Pac-Man's body has covered so far. A cell renders
-  // empty once its coverIndex is below this count.
-  const [eaten, setEaten] = useState(0)
-  // True during the end-of-loop pause once the whole board is cleared.
+  const activityRef = useRef<HTMLDivElement>(null)
+  const repairmanRef = useRef<HTMLDivElement>(null)
+  const wreckerRef = useRef<HTMLDivElement>(null)
+  const [built, setBuilt] = useState(0)
+  const [broken, setBroken] = useState(0)
   const [gameOver, setGameOver] = useState(false)
+  const [boostMode, setBoostMode] = useState(false)
+  const [isActive, setIsActive] = useState(true)
+  const [pageVisible, setPageVisible] = useState(true)
 
-  // Single rAF loop drives Pac-Man's position + facing + opacity straight on
+  useEffect(() => {
+    const node = activityRef.current
+    if (!node) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsActive(entry.isIntersecting),
+      { rootMargin: "240px" },
+    )
+    observer.observe(node)
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const handleVisibility = () => setPageVisible(!document.hidden)
+    handleVisibility()
+    document.addEventListener("visibilitychange", handleVisibility)
+
+    return () => document.removeEventListener("visibilitychange", handleVisibility)
+  }, [])
+
+  // Single rAF loop drives sprite position + facing + opacity straight on
   // the ref (no React churn per frame) and nudges React state only when the
-  // eaten count or game-over flag actually flips — so the grid re-renders
+  // build/break count or loop-complete flag actually flips — so the grid re-renders
   // ~once per cell, not per frame.
   useEffect(() => {
     const { legEnd, loopMs, passTimes } = anim
+    const routeMs = legEnd[legEnd.length - 1] ?? 0
 
-    // Position the sprite via the ref only (never via JSX style) so the
-    // frequent eaten-count re-renders can't stomp the rAF transform.
-    const place = (x: number, y: number, rot: number, opacity: number) => {
-      if (!pacRef.current) return
-      pacRef.current.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`
-      pacRef.current.style.opacity = String(opacity)
+    const place = (
+      ref: React.RefObject<HTMLDivElement | null>,
+      x: number,
+      y: number,
+      rot: number,
+      opacity: number,
+    ) => {
+      if (!ref.current) return
+      ref.current.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg)`
+      ref.current.style.opacity = String(opacity)
     }
 
-    if (prefersReducedMotion || nodes.length === 0) {
-      setEaten(0)
+    if (nodes.length === 0) {
+      setBuilt(passTimes.length)
+      setBroken(0)
       setGameOver(false)
-      place((nodes[0]?.x ?? 0) + OFFSET, (nodes[0]?.y ?? 0) + OFFSET, 0, 1)
+      setBoostMode(false)
+      place(repairmanRef, (nodes[0]?.x ?? 0) + OFFSET, (nodes[0]?.y ?? 0) + OFFSET, 0, 1)
+      place(wreckerRef, (nodes[0]?.x ?? 0) + OFFSET, (nodes[0]?.y ?? 0) + OFFSET, 0, 0)
       return
     }
+
+    if (!isActive || !pageVisible) return
 
     const total = nodes.length
     let raf = 0
     let start: number | undefined
-    let lastRot = 0
-    let seg = 0
-    let cover = 0
+    let repairRot = 0
+    let wreckerRot = 0
+    let repairSeg = 0
+    let wreckerSeg = 0
+    let repairedCount = 0
+    let wreckedCount = 0
     let prevElapsed = 0
+    let lastBuilt = -1
+    let lastBroken = -1
+    let lastOver = false
+    let lastBoost = false
 
-    const tick = (ts: number) => {
-      if (start === undefined) start = ts
-      const elapsed = (ts - start) % loopMs
+    setBuilt(0)
+    setBroken(0)
+    setGameOver(false)
+    setBoostMode(false)
 
-      // Modulo wrapped back to the start → grid refills, reset both pointers.
-      if (elapsed < prevElapsed) {
-        seg = 0
-        cover = 0
-      }
-      prevElapsed = elapsed
+    const positionAt = (elapsed: number, currentSeg: number, lastRot: number) => {
+      while (currentSeg < total - 1 && elapsed > legEnd[currentSeg]) currentSeg++
 
-      // Advance to the segment we're currently traversing (for position).
-      while (seg < total - 1 && elapsed > legEnd[seg]) seg++
-
-      const prevEnd = seg === 0 ? 0 : legEnd[seg - 1]
-      const p0 = nodes[Math.max(0, seg - 1)]
-      const p1 = nodes[seg]
+      const prevEnd = currentSeg === 0 ? 0 : legEnd[currentSeg - 1]
+      const p0 = nodes[Math.max(0, currentSeg - 1)]
+      const p1 = nodes[currentSeg]
       const dx = p1.x - p0.x
       const dy = p1.y - p0.y
-      const travelLeg = Math.max(0, legEnd[seg] - prevEnd)
+      const travelLeg = Math.max(0, legEnd[currentSeg] - prevEnd)
       const frac =
-        travelLeg <= 0 ? 1 : Math.min(1, (elapsed - prevEnd) / travelLeg)
+        travelLeg <= 0 ? 1 : Math.min(1, Math.max(0, (elapsed - prevEnd) / travelLeg))
 
-      const x = p0.x + dx * frac + OFFSET
-      const y = p0.y + dy * frac + OFFSET
-
-      // Snap facing to one of the four grid directions. Segments are always
-      // purely horizontal or vertical, so this is exact.
       if (frac < 1) {
         if (dx > 0) lastRot = 0
         else if (dx < 0) lastRot = 180
@@ -290,23 +325,80 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
         else if (dy < 0) lastRot = 270
       }
 
-      // Eat every filled cell whose pass-time is now behind us.
-      while (cover < passTimes.length && elapsed >= passTimes[cover]) cover++
+      return {
+        x: p0.x + dx * frac + OFFSET,
+        y: p0.y + dy * frac + OFFSET,
+        rot: lastRot,
+        seg: currentSeg,
+      }
+    }
 
-      // Board cleared and into the end pause → GAME OVER, fade Pac-Man out.
-      const over = passTimes.length > 0 && cover >= passTimes.length
+    const tick = (ts: number) => {
+      if (start === undefined) start = ts
+      const rawElapsed = (ts - start) % loopMs
+      const boostSlot = rawElapsed % BOOST_EVERY_MS
+      const inBoost = rawElapsed < routeMs && boostSlot < BOOST_MS
+      const completedBoostWindows = Math.floor(rawElapsed / BOOST_EVERY_MS)
+      const boostBonus =
+        completedBoostWindows * BOOST_MS * (BOOST_MULTIPLIER - 1) +
+        Math.min(boostSlot, BOOST_MS) * (BOOST_MULTIPLIER - 1)
+      const repairElapsed = Math.min(rawElapsed + boostBonus, routeMs)
+      const wreckerElapsed = Math.min(Math.max(0, rawElapsed - WRECKER_DELAY_MS), routeMs)
 
-      place(x, y, lastRot, over ? 0 : 1)
+      // Modulo wrapped back to the start → grid refills, reset both pointers.
+      if (rawElapsed < prevElapsed) {
+        repairSeg = 0
+        wreckerSeg = 0
+        repairedCount = 0
+        wreckedCount = 0
+      }
+      prevElapsed = rawElapsed
 
-      const covered = cover
-      setEaten((prev) => (prev === covered ? prev : covered))
-      setGameOver((prev) => (prev === over ? prev : over))
+      while (repairedCount < passTimes.length && repairElapsed >= passTimes[repairedCount]) {
+        repairedCount++
+      }
+      while (wreckedCount < passTimes.length && wreckerElapsed >= passTimes[wreckedCount]) {
+        wreckedCount++
+      }
+
+      const repairPos = positionAt(repairElapsed, repairSeg, repairRot)
+      repairSeg = repairPos.seg
+      repairRot = repairPos.rot
+      place(repairmanRef, repairPos.x, repairPos.y, repairPos.rot, 1)
+
+      if (rawElapsed > WRECKER_DELAY_MS && wreckedCount < passTimes.length) {
+        const wreckerPos = positionAt(wreckerElapsed, wreckerSeg, wreckerRot)
+        wreckerSeg = wreckerPos.seg
+        wreckerRot = wreckerPos.rot
+        place(wreckerRef, wreckerPos.x, wreckerPos.y, wreckerPos.rot, 0.88)
+      } else {
+        place(wreckerRef, nodes[0].x + OFFSET, nodes[0].y + OFFSET, 0, 0)
+      }
+
+      const over = passTimes.length > 0 && repairedCount >= passTimes.length && wreckedCount >= passTimes.length
+
+      if (lastBuilt !== repairedCount) {
+        lastBuilt = repairedCount
+        setBuilt(repairedCount)
+      }
+      if (lastBroken !== wreckedCount) {
+        lastBroken = wreckedCount
+        setBroken(wreckedCount)
+      }
+      if (lastOver !== over) {
+        lastOver = over
+        setGameOver(over)
+      }
+      if (lastBoost !== inBoost) {
+        lastBoost = inBoost
+        setBoostMode(inBoost)
+      }
       raf = requestAnimationFrame(tick)
     }
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [nodes, anim, prefersReducedMotion])
+  }, [nodes, anim, isActive, pageVisible])
 
   return (
     <motion.div
@@ -315,6 +407,7 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.5, ease: "easeOut", delay: 0.05 }}
       className="theme-card p-6 h-full"
+      ref={activityRef}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -367,12 +460,9 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
       </p>
 
       {/*
-        Heatmap with Pac-Man weaving through the filled cells on grid-aligned
-        lanes (up/down/left/right only), emptying each block as his body
-        passes over it — so he never glides across an un-eaten one. Targets
-        go faintest → densest, nearest-block-next within each tier; the whole
-        grid refills when the loop restarts. Pac-Man is absolutely positioned
-        over the grid and driven by the rAF loop above.
+        Arcade builder loop: an original repairman sprite follows the same
+        grid-aligned route and builds each contribution cell. A small wrecker
+        trails behind and breaks the path, then the board loops.
       */}
       <div className="overflow-x-auto">
         <div className="relative inline-block">
@@ -382,17 +472,23 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
               <div key={weekIndex} className="flex flex-col gap-[3px]">
                 {week.map((day, dayIndex) => {
                   const ci = anim.coverIndex[weekIndex]?.[dayIndex] ?? -1
-                  const isEaten =
-                    !prefersReducedMotion && ci >= 0 && ci < eaten
+                  const isAnimatedCell = ci >= 0
+                  const isBroken =
+                    isAnimatedCell && ci < broken
+                  const isBuilt =
+                    isAnimatedCell && ci < built && !isBroken
+                  const cellColor =
+                    !isAnimatedCell || isBuilt ? getColor(day.level) : getColor(0)
                   return (
                     <div
                       key={dayIndex}
-                      className={`h-[12px] w-[12px] rounded-[2px] ${
-                        isEaten ? "cell-munch" : ""
-                      }`}
+                      className={`github-contribution-cell h-[12px] w-[12px] rounded-[2px] ${
+                        isBuilt ? "cell-build" : ""
+                      } ${isBroken ? "cell-break" : ""}`}
                       style={{
-                        backgroundColor: getColor(isEaten ? 0 : day.level),
-                        transition: "background-color 120ms ease-out",
+                        backgroundColor: cellColor,
+                        opacity: isBroken ? 0.56 : isAnimatedCell && !isBuilt ? 0.42 : 1,
+                        transition: "background-color 140ms ease-out, opacity 140ms ease-out",
                       }}
                       title={
                         day.date
@@ -406,24 +502,46 @@ export function GitHubActivity({ contributions, username }: GitHubActivityProps)
             ))}
           </div>
 
-          {/* Pac-Man overlay — position/rotation/opacity are set imperatively
-              by the rAF loop, so nothing here drives transform. */}
           <div
-            ref={pacRef}
-            className="absolute top-0 left-0 pointer-events-none will-change-transform"
-            style={{ willChange: "transform, opacity", transition: "opacity 220ms ease-out" }}
+            ref={repairmanRef}
+            className={`absolute top-0 left-0 pointer-events-none will-change-transform ${
+              boostMode ? "repairman-boost" : ""
+            }`}
+            style={{ willChange: "transform, opacity", transition: "opacity 160ms ease-out" }}
           >
-            <PacmanSprite />
+            <RepairmanSprite />
           </div>
 
-          {/* GAME OVER card during the end-of-loop pause */}
+          <div
+            ref={wreckerRef}
+            className="absolute top-0 left-0 pointer-events-none will-change-transform"
+            style={{ willChange: "transform, opacity", transition: "opacity 160ms ease-out" }}
+          >
+            <WreckerSprite />
+          </div>
+
+          {boostMode && (
+            <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center pointer-events-none">
+              <span
+                className="repairman-boost-label theme-badge px-3 py-1 text-xs font-bold uppercase"
+                style={{
+                  backgroundColor: "var(--bg-elevated)",
+                  border: "1px solid var(--accent)",
+                  color: "var(--accent)",
+                }}
+              >
+                Turbo Repair
+              </span>
+            </div>
+          )}
+
           {gameOver && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <span
-                className="pacman-gameover font-display text-2xl md:text-3xl font-semibold uppercase"
+                className="builder-loop-complete font-display text-2xl md:text-3xl font-semibold uppercase"
                 style={{ color: "var(--accent)" }}
               >
-                Game Over
+                Rebuild Loop
               </span>
             </div>
           )}

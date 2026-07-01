@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Mail, Github, Linkedin } from "lucide-react"
 import { useCopyEmail } from "@/lib/contact"
+import { AnimatedWave } from "@/components/home/animated-wave"
 
 const externalLinks = [
   { label: "GITHUB", href: "#", icon: Github },
@@ -13,8 +14,18 @@ export function Footer() {
   const { copied: mailCopied, copy: copyEmail } = useCopyEmail()
 
   return (
-    <footer className="px-6 py-16">
-      <div className="mx-auto max-w-[1200px]">
+    <footer className="relative overflow-hidden px-6 py-16">
+      <div
+        className="absolute inset-x-0 top-0 h-36 opacity-30"
+        style={{
+          maskImage: "linear-gradient(to bottom, black 45%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 45%, transparent 100%)",
+        }}
+      >
+        <AnimatedWave />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-[1200px]">
         {/* Divider */}
         <div
           className="mb-12 h-px w-full"
