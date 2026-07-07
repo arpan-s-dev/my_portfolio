@@ -48,7 +48,7 @@ export function ProfileCard() {
             style={{ backgroundColor: "var(--bg-elevated)" }}
           >
             <Image
-              src="/headshot.jpg"
+              src="/profile-image.png"
               alt="Arpanjeet Singh"
               fill
               sizes="160px"
