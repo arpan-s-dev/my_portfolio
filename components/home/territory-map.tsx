@@ -1,7 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import Image from "next/image"
 import { useTheme } from "@/components/theme-provider"
 
 export function TerritoryMap() {
@@ -28,7 +27,7 @@ export function TerritoryMap() {
         TERRITORY
       </p>
 
-      {/* Static map image */}
+      {/* Animated territory video */}
       <div
         className="relative w-full overflow-hidden border"
         style={{
@@ -37,14 +36,14 @@ export function TerritoryMap() {
           backgroundColor: "var(--bg-card)",
         }}
       >
-        <Image
-          src="/territory-map.png"
-          alt="Hand-drawn map of the SJSU, Bay Area, and Central Valley territory"
-          width={1024}
-          height={559}
+        <video
+          src="/territory-map.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
           className="w-full max-h-[280px] object-cover"
           style={{ filter: mapFilter }}
-          priority
         />
       </div>
 
