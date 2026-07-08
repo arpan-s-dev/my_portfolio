@@ -2,6 +2,16 @@
 
 import { motion } from "framer-motion"
 import { useTheme } from "@/components/theme-provider"
+import {
+  LoadBoardVisual,
+  FreightDocMatcherVisual,
+  OCRVisual,
+  LodestarVisual,
+  FreightFieldVisual,
+  SpaceProjectVisual,
+  RAGVisual,
+  FineTuningVisual,
+} from "@/components/projects/project-visuals"
 
 interface Project {
   title: string
@@ -11,6 +21,17 @@ interface Project {
   demo?: string
   planned?: boolean
   badges?: string[]
+}
+
+const projectVisualMap: Record<string, React.ComponentType> = {
+  "Unified Load Board": LoadBoardVisual,
+  "Freight Doc Matcher": FreightDocMatcherVisual,
+  "POD_RC_AUTO_OCR": OCRVisual,
+  "Lodestar": LodestarVisual,
+  "FreightField AI": FreightFieldVisual,
+  "Space Project": SpaceProjectVisual,
+  "RAG System": RAGVisual,
+  "Fine-Tuning Experiments": FineTuningVisual,
 }
 
 const shippedProjects: Project[] = [
@@ -75,6 +96,7 @@ const plannedProjects: Project[] = [
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const { theme } = useTheme()
   const hasRepo = Boolean(project.github && project.github !== "#")
+  const Visual = projectVisualMap[project.title] ?? null
 
   // The whole card is a link when a real GitHub URL is wired up — clicking
   // anywhere on a shipped card opens the repo in a new tab. Planned cards
@@ -96,97 +118,99 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.08 }}
-      className={`theme-card relative p-6 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.45)] ${hasRepo ? "cursor-pointer block no-underline" : ""}`}
-      style={{
-        borderColor: "var(--border-faint)",
-      }}
-      whileHover={{
-        borderColor: "var(--accent)",
-      }}
+      className={`theme-card relative overflow-hidden transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.45)] ${hasRepo ? "cursor-pointer block no-underline" : ""}`}
+      style={{ borderColor: "var(--border-faint)" }}
+      whileHover={{ borderColor: "var(--accent)" }}
     >
-      {/* Planned badge */}
-      {project.planned && (
-        <span
-          className="theme-badge absolute top-4 right-4 px-2 py-1 text-xs font-medium"
-          style={{
-            backgroundColor: theme === "arthur" ? "rgba(201, 169, 97, 0.2)" : "rgba(168, 85, 247, 0.2)",
-            color: "var(--accent)"
-          }}
+      {/* Animated visual preview area */}
+      {Visual && <Visual />}
+
+      {/* Card content */}
+      <div className="relative p-6">
+        {/* Planned badge */}
+        {project.planned && (
+          <span
+            className="theme-badge absolute top-0 right-4 px-2 py-1 text-xs font-medium"
+            style={{
+              backgroundColor: theme === "arthur" ? "rgba(201, 169, 97, 0.2)" : "rgba(168, 85, 247, 0.2)",
+              color: "var(--accent)"
+            }}
+          >
+            PLANNED
+          </span>
+        )}
+
+        {/* Title */}
+        <h3
+          className="font-display text-xl font-semibold mb-2 pr-20"
+          style={{ color: "var(--text-primary)" }}
         >
-          PLANNED
-        </span>
-      )}
+          {project.title}
+        </h3>
 
-      {/* Title */}
-      <h3
-        className="font-display text-xl font-semibold mb-2 pr-20"
-        style={{ color: "var(--text-primary)" }}
-      >
-        {project.title}
-      </h3>
+        {project.badges && project.badges.length > 0 ? (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {project.badges.map((badge) => (
+              <span
+                key={badge}
+                className="theme-badge px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                style={{
+                  backgroundColor: "var(--bg-elevated)",
+                  color: "var(--accent)",
+                  border: "1px solid var(--border-faint)",
+                  borderRadius: "var(--radius-theme)"
+                }}
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
-      {project.badges && project.badges.length > 0 ? (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {project.badges.map((badge) => (
+        {/* Description */}
+        <p
+          className="text-sm leading-relaxed mb-4"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {project.description}
+        </p>
+
+        {/* Stack tags */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.stack.map((tech) => (
             <span
-              key={badge}
-              className="theme-badge px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+              key={tech}
+              className="px-2 py-1 text-xs font-medium uppercase tracking-wider border transition-transform duration-150 ease-out hover:-translate-y-0.5"
               style={{
-                backgroundColor: "var(--bg-elevated)",
-                color: "var(--accent)",
-                border: "1px solid var(--border-faint)",
+                borderColor: "var(--border-faint)",
+                color: "var(--text-muted)",
                 borderRadius: "var(--radius-theme)"
               }}
             >
-              {badge}
+              {tech}
             </span>
           ))}
         </div>
-      ) : null}
 
-      {/* Description */}
-      <p
-        className="text-sm leading-relaxed mb-4"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {project.description}
-      </p>
-
-      {/* Stack tags */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {project.stack.map((tech) => (
-          <span
-            key={tech}
-            className="px-2 py-1 text-xs font-medium uppercase tracking-wider border transition-transform duration-150 ease-out hover:-translate-y-0.5"
-            style={{
-              borderColor: "var(--border-faint)",
-              color: "var(--text-muted)",
-              borderRadius: "var(--radius-theme)"
-            }}
-          >
-            {tech}
-          </span>
-        ))}
-      </div>
-
-      {/* Footer hint — visual cue only; the whole card is the link. */}
-      <div className="flex items-center gap-4">
-        {hasRepo ? (
-          <span
-            className="text-sm font-medium underline underline-offset-4"
-            style={{ color: "var(--accent)" }}
-          >
-            View on GitHub →
-          </span>
-        ) : null}
-        {project.planned ? (
-          <span
-            className="text-sm"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Coming soon
-          </span>
-        ) : null}
+        {/* Footer hint — visual cue only; the whole card is the link. */}
+        <div className="flex items-center gap-4">
+          {hasRepo ? (
+            <span
+              className="text-sm font-medium underline underline-offset-4"
+              style={{ color: "var(--accent)" }}
+            >
+              View on GitHub →
+            </span>
+          ) : null}
+          {project.planned ? (
+            <span
+              className="text-sm"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Coming soon
+            </span>
+          ) : null}
+        </div>
       </div>
     </Wrapper>
   )
