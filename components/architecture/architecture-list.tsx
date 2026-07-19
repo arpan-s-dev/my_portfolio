@@ -702,6 +702,68 @@ const architectureProjects: ArchitectureProject[] = [
     }
   },
   {
+    id: "lodestar",
+    title: "Lodestar",
+    tags: ["Edge AI", "Android", "Hackathon Winner"],
+    description: "Offline Android survival copilot built for the Qualcomm x Meta ExecuTorch Hackathon. It combines deterministic first-aid triage, spoof-aware orientation, offline hospital guidance, and an on-device Qwen path on Snapdragon hardware.",
+    github: "https://github.com/arpan-s-dev/QCOM",
+    stats: [
+      { label: "Tracked Files", value: "112", icon: BarChart3 },
+      { label: "Main Kotlin Files", value: "46", icon: Zap },
+      { label: "Test Files", value: "8", icon: TrendingUp },
+      { label: "Offline Demo Assets", value: "12", icon: Activity }
+    ],
+    category: "Edge AI",
+    systemDesignDiagram: lodestarDiagram,
+    techStack: [
+      { layer: "App Platform", choice: "Kotlin + Jetpack Compose", why: "Native Android gave direct access to sensors, mic, and location while keeping the UI fast and field-ready." },
+      { layer: "On-Device Inference", choice: "ExecuTorch `v1.0.0` + Qualcomm QNN", why: "Targets Snapdragon NPU execution locally instead of depending on a cloud model path." },
+      { layer: "Model Runtime", choice: "Qwen3 hybrid `.pte` on SM8750", why: "Aligns the assistant pipeline with the Galaxy S25 Ultra demo hardware and the hackathon's edge-AI focus." },
+      { layer: "Safety Logic", choice: "Deterministic `SafetyTree`", why: "Severity is computed before any generation so the highest-risk decision stays explainable and reproducible." },
+      { layer: "Orientation", choice: "Solar compass + star solver + spoof detection", why: "Builds resilient heading recovery for cases where GPS is unavailable, untrusted, or intentionally spoofed." },
+      { layer: "Offline Data", choice: "Bundled JSON assets", why: "Hospitals, field-kit references, and corpus data ship inside the app, matching the no-`INTERNET` constraint." }
+    ],
+    implementation: [
+      {
+        heading: "Offline-First By Constraint, Not Marketing",
+        body: [
+          "The app intentionally declares no `INTERNET` permission. That forces every user-facing flow to work with local assets, device sensors, and on-device logic rather than quietly falling back to cloud APIs.",
+          "That constraint shapes the whole architecture: hospital lookup uses bundled JSON, triage runs through `SafetyTree`, and the assistant path only upgrades when the local Qwen runtime is available."
+        ]
+      },
+      {
+        heading: "Deterministic Triage Before Model Output",
+        body: [
+          "`MainViewModel` routes emergency prompts through `SafetyTree` first, then into `TriageOrchestrator`. This preserves a stable severity label even when the NPU model is warming up, missing, or replaced with a safe stub during demos.",
+          "That separation is important for a safety-focused app because the system's highest-risk decision is never delegated entirely to free-form generation."
+        ]
+      },
+      {
+        heading: "Spoof-Aware Orientation Stack",
+        body: [
+          "The navigation path does more than read GPS. `PositionStateMachine` tracks trust state, `SolarCompass` recovers heading in daytime, and `StarNavigationPipeline` handles staged night-sky recovery with a bundled bright-star catalog.",
+          "When spoofing is detected, the app can freeze to the last trusted position and surface that downgrade visibly instead of acting on bad coordinates."
+        ]
+      },
+      {
+        heading: "Hackathon Demo Reliability",
+        body: [
+          "Demo scenarios are built into the product so judges can see specific offline flows quickly: negation-aware triage, Powell Street hospital guidance, STAR_FIX night-sky recovery, and a wound-photo checklist.",
+          "That makes the product presentation honest and repeatable under hackathon conditions where networking, lighting, and timing are unpredictable."
+        ]
+      }
+    ],
+    outcomes: {
+      status: "Built for the Qualcomm x Meta ExecuTorch Hackathon and recognized with GitHub's `Copilot-Powered Build Award` for creative and effective use of GitHub Copilot. The repo already includes real device screenshots, demo scripts, and the on-device Android shell.",
+      roadmap: [
+        "Finish full end-to-end validation of the Qwen NPU path on the target Galaxy S25 Ultra device",
+        "Expand the offline hospital dataset beyond the current San Francisco scope",
+        "Replace the current wound-photo guided checklist with a true on-device vision assessment path",
+        "Broaden the trust-state navigation system into more generalized field-routing and incident workflows"
+      ]
+    }
+  },
+  {
     id: "load-board",
     title: "Distributed Load Board Architecture",
     tags: ["Microservices", "Trucking"],
@@ -898,68 +960,6 @@ const architectureProjects: ArchitectureProject[] = [
         "Vector index for blocking at scale (FAISS / pgvector) once doc counts exceed ~10k",
         "Lane-level forecasting on the DuckDB warehouse — RPM trends, broker churn signals",
         "Power BI / Tableau template workbooks shipped alongside the Parquet exports"
-      ]
-    }
-  },
-  {
-    id: "lodestar",
-    title: "Lodestar",
-    tags: ["Edge AI", "Android", "Hackathon Winner"],
-    description: "Offline Android survival copilot built for the Qualcomm x Meta ExecuTorch Hackathon. It combines deterministic first-aid triage, spoof-aware orientation, offline hospital guidance, and an on-device Qwen path on Snapdragon hardware.",
-    github: "https://github.com/arpan-s-dev/QCOM",
-    stats: [
-      { label: "Tracked Files", value: "112", icon: BarChart3 },
-      { label: "Main Kotlin Files", value: "46", icon: Zap },
-      { label: "Test Files", value: "8", icon: TrendingUp },
-      { label: "Offline Demo Assets", value: "12", icon: Activity }
-    ],
-    category: "Edge AI",
-    systemDesignDiagram: lodestarDiagram,
-    techStack: [
-      { layer: "App Platform", choice: "Kotlin + Jetpack Compose", why: "Native Android gave direct access to sensors, mic, and location while keeping the UI fast and field-ready." },
-      { layer: "On-Device Inference", choice: "ExecuTorch `v1.0.0` + Qualcomm QNN", why: "Targets Snapdragon NPU execution locally instead of depending on a cloud model path." },
-      { layer: "Model Runtime", choice: "Qwen3 hybrid `.pte` on SM8750", why: "Aligns the assistant pipeline with the Galaxy S25 Ultra demo hardware and the hackathon's edge-AI focus." },
-      { layer: "Safety Logic", choice: "Deterministic `SafetyTree`", why: "Severity is computed before any generation so the highest-risk decision stays explainable and reproducible." },
-      { layer: "Orientation", choice: "Solar compass + star solver + spoof detection", why: "Builds resilient heading recovery for cases where GPS is unavailable, untrusted, or intentionally spoofed." },
-      { layer: "Offline Data", choice: "Bundled JSON assets", why: "Hospitals, field-kit references, and corpus data ship inside the app, matching the no-`INTERNET` constraint." }
-    ],
-    implementation: [
-      {
-        heading: "Offline-First By Constraint, Not Marketing",
-        body: [
-          "The app intentionally declares no `INTERNET` permission. That forces every user-facing flow to work with local assets, device sensors, and on-device logic rather than quietly falling back to cloud APIs.",
-          "That constraint shapes the whole architecture: hospital lookup uses bundled JSON, triage runs through `SafetyTree`, and the assistant path only upgrades when the local Qwen runtime is available."
-        ]
-      },
-      {
-        heading: "Deterministic Triage Before Model Output",
-        body: [
-          "`MainViewModel` routes emergency prompts through `SafetyTree` first, then into `TriageOrchestrator`. This preserves a stable severity label even when the NPU model is warming up, missing, or replaced with a safe stub during demos.",
-          "That separation is important for a safety-focused app because the system's highest-risk decision is never delegated entirely to free-form generation."
-        ]
-      },
-      {
-        heading: "Spoof-Aware Orientation Stack",
-        body: [
-          "The navigation path does more than read GPS. `PositionStateMachine` tracks trust state, `SolarCompass` recovers heading in daytime, and `StarNavigationPipeline` handles staged night-sky recovery with a bundled bright-star catalog.",
-          "When spoofing is detected, the app can freeze to the last trusted position and surface that downgrade visibly instead of acting on bad coordinates."
-        ]
-      },
-      {
-        heading: "Hackathon Demo Reliability",
-        body: [
-          "Demo scenarios are built into the product so judges can see specific offline flows quickly: negation-aware triage, Powell Street hospital guidance, STAR_FIX night-sky recovery, and a wound-photo checklist.",
-          "That makes the product presentation honest and repeatable under hackathon conditions where networking, lighting, and timing are unpredictable."
-        ]
-      }
-    ],
-    outcomes: {
-      status: "Built for the Qualcomm x Meta ExecuTorch Hackathon and recognized with GitHub's `Copilot-Powered Build Award` for creative and effective use of GitHub Copilot. The repo already includes real device screenshots, demo scripts, and the on-device Android shell.",
-      roadmap: [
-        "Finish full end-to-end validation of the Qwen NPU path on the target Galaxy S25 Ultra device",
-        "Expand the offline hospital dataset beyond the current San Francisco scope",
-        "Replace the current wound-photo guided checklist with a true on-device vision assessment path",
-        "Broaden the trust-state navigation system into more generalized field-routing and incident workflows"
       ]
     }
   }

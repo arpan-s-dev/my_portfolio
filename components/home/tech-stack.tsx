@@ -280,8 +280,8 @@ function useGraph() {
 
 /* ------------------------------- animation ------------------------------- */
 
-const STEP = 110
-const TRAVEL = { duration: 0.42, ease: [0.22, 1, 0.36, 1] as const }
+const STEP = 35
+const TRAVEL = { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const }
 
 /**
  * Builds the graph once: count climbs from 0 to total, then stays.
@@ -307,7 +307,7 @@ function useBuildSequence(total: number, reducedMotion: boolean) {
       })
     }
 
-    timer = setTimeout(tick, 400)
+    timer = setTimeout(tick, 150)
     return () => clearTimeout(timer)
   }, [total, reducedMotion, runId])
 
