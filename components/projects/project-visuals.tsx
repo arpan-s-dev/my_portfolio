@@ -253,38 +253,60 @@ export function FreightFieldVisual() {
   )
 }
 
-// ── 6. Space Project — satellite + ML ─────────────────────────────────
-export function SpaceProjectVisual() {
+// ── 6. FloodLens — satellite flood-water segmentation ─────────────────
+export function FloodLensVisual() {
   const { theme } = useTheme()
   const c = theme === "arthur" ? "#c9a961" : "#a855f7"
-  const stars = [[18,15],[55,28],[82,9],[225,18],[252,40],[265,100],[26,108],[198,128],[108,124],[240,75]]
+  // Pixel tile: a satellite chip whose "water" cells light up into a mask.
+  const cols = 12, rows = 5, x0 = 24, y0 = 24, cell = 18
+  const water = new Set([
+    // diagonal river
+    "1,0", "2,0", "2,1", "3,1", "3,2", "4,2", "4,3", "5,3", "5,4", "6,4",
+    // lagoon
+    "8,0", "9,0", "8,1", "9,1", "10,1",
+  ])
+  const tileW = cols * cell, tileH = rows * cell
   return (
     <div className="relative w-full h-36 overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
       <GridBg c={c} />
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 280 144" aria-hidden="true">
-        {stars.map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.5 : 1} fill={c} opacity="0.4">
-            <animate attributeName="opacity" values="0.15;0.7;0.15" dur={`${1.6 + i * 0.22}s`} repeatCount="indefinite" />
-          </circle>
-        ))}
-        {/* Planet */}
-        <circle cx="140" cy="72" r="24" fill={`${c}18`} stroke={c} strokeWidth="1.5" opacity="0.9" />
-        {/* Planet ring */}
-        <ellipse cx="140" cy="72" rx="38" ry="9" fill="none" stroke={c} strokeWidth="0.9" opacity="0.35" />
-        {/* Orbit path */}
-        <ellipse cx="140" cy="72" rx="62" ry="30" fill="none" stroke={c} strokeWidth="0.5" opacity="0.18" strokeDasharray="4 5" />
-        {/* Orbiting satellite */}
+        {/* Tile outline */}
+        <rect x={x0} y={y0} width={tileW} height={tileH} rx="3" fill="none" stroke={c} strokeWidth="0.6" opacity="0.3" />
+        {/* Pixel grid — water cells fade in left→right like a segmentation sweep */}
+        {Array.from({ length: rows }).map((_, r) =>
+          Array.from({ length: cols }).map((_, col) => {
+            const isWater = water.has(`${col},${r}`)
+            const x = x0 + col * cell, y = y0 + r * cell
+            const delay = (col / cols) * 2.4
+            return (
+              <rect key={`${col}-${r}`} x={x + 1.5} y={y + 1.5} width={cell - 3} height={cell - 3} rx="2"
+                fill={c} opacity={isWater ? 0 : 0.05}>
+                {isWater && (
+                  <animate attributeName="opacity" values="0;0.8;0.8;0" keyTimes="0;0.18;0.88;1"
+                    dur="4.2s" begin={`${delay}s`} repeatCount="indefinite" />
+                )}
+              </rect>
+            )
+          })
+        )}
+        {/* Scanning beam sweeping across the tile */}
+        <rect x={x0} y={y0} width="5" height={tileH} fill={c} opacity="0.3">
+          <animate attributeName="x" values={`${x0};${x0 + tileW - 5};${x0}`} dur="4.2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.4;0.12;0.4" dur="4.2s" repeatCount="indefinite" />
+        </rect>
+        {/* Satellite gliding across the top */}
         <g>
-          <animateTransform attributeName="transform" type="rotate" values="0 140 72;360 140 72" dur="5s" repeatCount="indefinite" />
-          {/* Satellite body */}
-          <rect x="196" y="69" width="11" height="7" rx="1.5" fill={`${c}30`} stroke={c} strokeWidth="1" />
-          {/* Solar panels */}
-          <rect x="188" y="71" width="8" height="3" rx="0.5" fill="none" stroke={c} strokeWidth="0.75" opacity="0.8" />
-          <rect x="207" y="71" width="8" height="3" rx="0.5" fill="none" stroke={c} strokeWidth="0.75" opacity="0.8" />
+          <animateTransform attributeName="transform" type="translate" values="-34,0;300,0" dur="6.5s" repeatCount="indefinite" />
+          <rect x="0" y="7" width="11" height="7" rx="1.5" fill={`${c}30`} stroke={c} strokeWidth="1" />
+          <rect x="-8" y="9" width="8" height="3" rx="0.5" fill="none" stroke={c} strokeWidth="0.75" opacity="0.8" />
+          <rect x="11" y="9" width="8" height="3" rx="0.5" fill="none" stroke={c} strokeWidth="0.75" opacity="0.8" />
+          <line x1="5.5" y1="14" x2="5.5" y2="22" stroke={c} strokeWidth="0.5" opacity="0.3" strokeDasharray="1 2" />
         </g>
-        {/* U-Net label */}
-        <text x="30" y="128" fill={c} fontSize="6.5" fontFamily="monospace" opacity="0.55">U-Net · Prithvi</text>
-        <text x="170" y="128" fill={c} fontSize="6.5" fontFamily="monospace" opacity="0.55">Sen1Floods11</text>
+        {/* IoU badge */}
+        <rect x="196" y="120" width="56" height="18" rx="3" fill={`${c}20`} stroke={c} strokeWidth="0.75" />
+        <text x="224" y="132" textAnchor="middle" fill={c} fontSize="8" fontFamily="monospace">IoU 0.68</text>
+        {/* Label */}
+        <text x="24" y="132" fill={c} fontSize="6.5" fontFamily="monospace" opacity="0.55">U-Net · Sen1Floods11</text>
       </svg>
       <FadeEdge />
     </div>

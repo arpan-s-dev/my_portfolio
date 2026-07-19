@@ -8,7 +8,7 @@ import {
   OCRVisual,
   LodestarVisual,
   FreightFieldVisual,
-  SpaceProjectVisual,
+  FloodLensVisual,
   RAGVisual,
   FineTuningVisual,
 } from "@/components/projects/project-visuals"
@@ -28,8 +28,8 @@ const projectVisualMap: Record<string, React.ComponentType> = {
   "Freight Doc Matcher": FreightDocMatcherVisual,
   "POD_RC_AUTO_OCR": OCRVisual,
   "Lodestar": LodestarVisual,
+  "FloodLens": FloodLensVisual,
   "FreightField AI": FreightFieldVisual,
-  "Space Project": SpaceProjectVisual,
   "RAG System": RAGVisual,
   "Fine-Tuning Experiments": FineTuningVisual,
 }
@@ -74,13 +74,6 @@ const plannedProjects: Project[] = [
     title: "FreightField AI",
     description: "Agentic AI that fetches load information and answers dispatcher questions in natural language.",
     stack: ["Claude API", "LangGraph", "FastAPI", "Postgres"],
-    github: "#",
-    planned: true
-  },
-  {
-    title: "Space Project",
-    description: "Personal project at the intersection of space data and ML. Scope TBD.",
-    stack: ["Python", "TensorFlow", "NASA APIs"],
     github: "#",
     planned: true
   },
