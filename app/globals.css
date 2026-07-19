@@ -579,13 +579,17 @@
   }
 }
 
+/* Opacity-only pulse. Animating `filter: drop-shadow` here forced a full
+   re-rasterization of every node each frame across all diagrams at once —
+   the main source of scroll stutter on the architecture section. Opacity
+   composites cheaply on the GPU. */
 @keyframes mermaid-node-pulse {
   0%,
   100% {
-    filter: drop-shadow(0 0 0 transparent);
+    opacity: 0.88;
   }
   50% {
-    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 24%, transparent));
+    opacity: 1;
   }
 }
 

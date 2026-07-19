@@ -43,6 +43,13 @@ const shippedProjects: Project[] = [
     badges: ["🌍 AI for Good", "⚡ Edge AI"]
   },
   {
+    title: "Lodestar",
+    description: "Offline Android survival copilot for the Qualcomm x Meta ExecuTorch Hackathon. Jetpack Compose UI over deterministic triage, spoof-aware navigation, hospital guidance, and on-device Qwen inference on Snapdragon.",
+    stack: ["Kotlin", "Jetpack Compose", "ExecuTorch", "QNN", "Android"],
+    github: "https://github.com/arpan-s-dev/QCOM",
+    badges: ["🏆 Copilot-Powered Build Award", "🚀 Qualcomm x Meta Hackathon", "📱 100% Offline"]
+  },
+  {
     title: "Unified Load Board",
     description: "One interface for loads across DAT, Truckstop, and Amazon Relay. FastAPI backend, adapter-pattern architecture, Next.js frontend.",
     stack: ["FastAPI", "Next.js", "Python", "TypeScript", "Pydantic"],
@@ -59,13 +66,6 @@ const shippedProjects: Project[] = [
     description: "Earlier heuristic predecessor of Freight Doc Matcher. Python CLI that matches Bills of Lading to Rate Confirmations across 13 brokers via a hybrid Tesseract + Claude extraction pipeline and a 100-point additive scorer. Outputs hyperlinked Excel.",
     stack: ["Python", "Claude API", "Tesseract", "openpyxl", "pdfplumber"],
     github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR"
-  },
-  {
-    title: "Lodestar",
-    description: "Offline Android survival copilot for the Qualcomm x Meta ExecuTorch Hackathon. Jetpack Compose UI over deterministic triage, spoof-aware navigation, hospital guidance, and on-device Qwen inference on Snapdragon.",
-    stack: ["Kotlin", "Jetpack Compose", "ExecuTorch", "QNN", "Android"],
-    github: "https://github.com/arpan-s-dev/QCOM",
-    badges: ["🏆 Copilot-Powered Build Award", "🚀 Qualcomm x Meta Hackathon", "📱 100% Offline"]
   }
 ]
 

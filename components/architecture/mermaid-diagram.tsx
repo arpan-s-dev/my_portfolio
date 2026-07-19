@@ -76,8 +76,8 @@ function getMermaidAnimationStyles(svgId: string) {
   50% { opacity: 1; transform: scale(1.08); }
 }
 @keyframes mermaidNodePulse {
-  0%, 100% { filter: drop-shadow(0 0 0 transparent); opacity: 0.9; }
-  50% { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 38%, transparent)); opacity: 1; }
+  0%, 100% { opacity: 0.88; }
+  50% { opacity: 1; }
 }
 @keyframes mermaidLabelGlow {
   0%, 100% { opacity: 0.86; }

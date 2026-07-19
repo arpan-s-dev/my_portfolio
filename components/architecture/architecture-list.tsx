@@ -32,7 +32,7 @@ interface ArchitectureProject {
   title: string
   tags: string[]
   description: string
-  stats: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }[]
+  stats: { label: string; value: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }[]
   category: string
   github?: string
   systemDesignDiagram?: string
@@ -520,7 +520,187 @@ const lodestarDiagram = `flowchart TB
     VM --> MED
     VM --> COMM`
 
+const floodLensArchitecture = `flowchart LR
+    subgraph UI["Front Ends"]
+        STATIC["demo_static/<br/>in-browser ONNX · WASM<br/>(live on HF Spaces)"]
+        WEB["web/<br/>React + Vite"]
+        GRADIO["demo/<br/>Gradio app"]
+    end
+
+    subgraph API["api/ — FastAPI"]
+        H["GET /health"]
+        S["GET /samples"]
+        P["POST /predict"]
+    end
+
+    subgraph CORE["ml/space_mapper — ML core"]
+        IOP["io.py<br/>GeoTIFF / mask I/O"]
+        DS["datasets.py<br/>manifests + splits"]
+        INF["inference.py<br/>heuristic + checkpoint"]
+        UNET["models/<br/>Tiny U-Net"]
+        LOSS["losses.py<br/>weighted BCE + Dice"]
+        MET["metrics.py<br/>IoU · Dice · P · R"]
+    end
+
+    CKPT[("tiny_unet_diverse<br/>.pt / .onnx")]
+
+    STATIC --> CKPT
+    WEB -->|image / sample id| P
+    P --> INF
+    GRADIO --> INF
+    INF --> UNET
+    INF --> IOP
+    UNET --> CKPT
+    DS --> IOP
+    LOSS -.training only.-> UNET
+    MET -.evaluation.-> INF`
+
+const floodLensClasses = `classDiagram
+    class PredictionResult {
+        +ndarray mask
+        +str method
+        +str details
+    }
+    class TinyUNet {
+        +int in_channels
+        +int out_channels
+        +int base_channels
+        +forward(x) Tensor
+    }
+    class SegmentationDataset {
+        +Sequence~SegmentationRecord~ records
+        +__getitem__(i) tuple
+        +__len__() int
+    }
+    class SegmentationRecord {
+        +Path image_path
+        +Path mask_path
+        +str split
+    }
+    class inference {
+        <<module>>
+        +heuristic_predict(image, disaster, threshold) PredictionResult
+        +predict_with_checkpoint(image, ckpt, threshold) PredictionResult
+        +predict_file(path, out, ckpt) PredictionResult
+    }
+    class losses {
+        <<module>>
+        +soft_dice_loss(logits, targets) Tensor
+        +make_criterion(name, pos_weight) Criterion
+        +compute_pos_weight(records) float
+    }
+    class metrics {
+        <<module>>
+        +binary_iou(y_true, y_pred) float
+        +dice_f1(y_true, y_pred) float
+        +precision(y_true, y_pred) float
+        +recall(y_true, y_pred) float
+    }
+
+    SegmentationDataset --> SegmentationRecord : yields
+    SegmentationDataset --> TinyUNet : feeds batches
+    inference ..> TinyUNet : loads checkpoint
+    inference ..> PredictionResult : produces
+    TinyUNet ..> losses : trained with
+    inference ..> metrics : scored by`
+
+const floodLensSequence = `sequenceDiagram
+    actor User
+    participant Page as Browser demo
+    participant API as FastAPI /predict
+    participant AD as MLSpaceMapperAdapter
+    participant FB as FallbackHeuristic
+    participant UNet as Tiny U-Net (ONNX)
+
+    User->>Page: Upload chip or pick a sample
+    Page->>Page: Read bands, resize to 128
+    alt In-browser live demo
+        Page->>UNet: sigmoid(logits) in WASM
+        UNet-->>Page: probability map
+    else Server path
+        Page->>API: POST image / sample id
+        API->>AD: predict(image)
+        alt ml.space_mapper available
+            AD-->>API: PredictionResult
+        else package missing
+            AD->>FB: fallback
+            FB-->>API: heuristic mask
+        end
+        API-->>Page: mask + water %
+    end
+    Page-->>User: Blue overlay + water %`
+
 const architectureProjects: ArchitectureProject[] = [
+  {
+    id: "floodlens",
+    title: "FloodLens — Satellite Flood Segmentation",
+    tags: ["Deep Learning", "Edge AI", "Geospatial"],
+    description: "Pixel-level flood-water segmentation from Sentinel-2 optical imagery. A Tiny U-Net trained with an imbalance-aware loss beats the classical NDWI heuristic ~6× (IoU 0.68), and the ~0.5 MB model is exported to ONNX to run entirely in-browser via WebAssembly — no GPU server at inference time.",
+    github: "https://github.com/arpan-s-dev/floodlens",
+    stats: [
+      { label: "IoU (held-out)", value: "0.68", icon: TrendingUp },
+      { label: "vs NDWI heuristic", value: "~6×", icon: Zap },
+      { label: "In-browser model", value: "~0.5 MB", icon: BarChart3 },
+      { label: "Chips / Countries", value: "102 / 10", icon: Activity }
+    ],
+    category: "AI Pipelines",
+    systemDesignDiagrams: [
+      { label: "System architecture (two front ends, one ML core)", chart: floodLensArchitecture },
+      { label: "Domain model + components (UML)", chart: floodLensClasses },
+      { label: "How a prediction flows (edge + server)", chart: floodLensSequence }
+    ],
+    techStack: [
+      { layer: "Model", choice: "Tiny U-Net (encoder–decoder CNN)", why: "Skip-connection segmentation net kept deliberately small (~0.5 MB) so it exports to ONNX and runs in-browser via WebAssembly." },
+      { layer: "Loss", choice: "Weighted BCE + soft Dice", why: "Water is ~1.8% of pixels; plain `BCE` collapses to \"predict no water everywhere\". `pos_weight ≈ 91` + Dice optimizes overlap directly and fixes the collapse." },
+      { layer: "Training", choice: "PyTorch + AdamW", why: "`make_criterion` / `compute_pos_weight` wire the imbalance-aware loss; 30 epochs on a CPU/CUDA build reproduce the checkpoint." },
+      { layer: "Edge Inference", choice: "ONNX Runtime Web (WASM)", why: "The exported `.onnx` runs client-side — zero GPU-backed servers, live on Hugging Face Spaces." },
+      { layer: "Backend (optional)", choice: "FastAPI", why: "`/health` · `/samples` · `/predict`. A lazy `MLSpaceMapperAdapter` imports the ML package if present and falls back to a heuristic otherwise, so the API runs even without `ml/`." },
+      { layer: "Data", choice: "Sen1Floods11 (Sentinel-2, 13-band)", why: "102-chip, 10-country subset with a 15-chip held-out test set; downloaded at runtime, never bundled." },
+      { layer: "Baseline", choice: "NDWI-like `(green − NIR)/(green + NIR)`", why: "Fixed, learning-free water index — the floor the learned model has to beat (IoU 0.11 → 0.68)." },
+      { layer: "Metrics", choice: "IoU · Dice/F1 · Precision · Recall", why: "Accuracy is intentionally *not* headlined — it is misleading when 98% of pixels are the majority class." }
+    ],
+    implementation: [
+      {
+        heading: "Beating Majority-Class Collapse (the real story)",
+        body: [
+          "v1 — 30 Ghana chips, plain `BCE`: IoU 0.000. With ~1.8% water pixels, cross-entropy is minimized by predicting \"no water\" everywhere. The model learned nothing.",
+          "Fix the loss → `weighted BCE + soft Dice` (pos_weight ≈ 91) on the *same* data: IoU 0.000 → 0.193. The imbalance-aware loss stops the collapse.",
+          "Fix the data → 102 chips across 10 countries (water 1.8% → 9.9%): IoU 0.193 → 0.678. Each change was verified by re-measuring, not assumed — the full gradient derivation is in `docs/ml_math_explained.md`."
+        ]
+      },
+      {
+        heading: "Edge-First Inference",
+        body: [
+          "The trained Tiny U-Net is exported to ONNX (`scripts/export_onnx.py`) and served from the static `demo_static/` app, which runs the model in the browser through ONNX Runtime Web + WebAssembly.",
+          "That removes the GPU-server dependency entirely: the live Hugging Face Space downloads a ~0.5 MB model once and does inference client-side. Click a sample chip or upload your own — the same code path a real user walks."
+        ]
+      },
+      {
+        heading: "Adapter + Graceful Fallback (`api/`)",
+        body: [
+          "`MLSpaceMapperAdapter` imports `space_mapper` lazily and probes for a `predict_image` / `segment_image` / `predict` callable. If the package — or an expected callable — is missing, `FallbackHeuristicPredictor` (a grayscale threshold) keeps `POST /predict` returning a valid mask.",
+          "This means the FastAPI backend boots and serves predictions even when the heavy ML package is not installed, which keeps the demo deployable on constrained hosts."
+        ]
+      },
+      {
+        heading: "Honest Evaluation",
+        body: [
+          "`metrics.py` reports IoU, Dice/F1, precision, and recall from explicit `ConfusionCounts` rather than headline accuracy. The held-out set is only 15 chips, so the README states the variance openly and treats the numbers as indicative.",
+          "Precision sits at ~0.70 — the model still over-paints water in places — which is surfaced as a known limitation rather than hidden."
+        ]
+      }
+    ],
+    outcomes: {
+      status: "Live and interactive on Hugging Face Spaces — the ~0.5 MB U-Net runs entirely in-browser via ONNX + WebAssembly with no signup. Trained on a 102-chip, 10-country Sen1Floods11 subset; the learned model reaches IoU 0.68 / Dice 0.81 on the held-out test set, ~6× the NDWI-like heuristic baseline.",
+      roadmap: [
+        "Scale up chip count and train on GPU (RTX 5050 / CUDA build)",
+        "Add Sentinel-1 (radar) inputs — radar sees through cloud cover that hides water in optical scenes",
+        "Threshold / probability calibration to raise precision (currently ~0.70)",
+        "Reference comparison against the NASA/IBM Prithvi geospatial foundation model",
+        "ImpactMesh-style multi-hazard extension (flood vs. wildfire)"
+      ]
+    }
+  },
   {
     id: "load-board",
     title: "Distributed Load Board Architecture",
