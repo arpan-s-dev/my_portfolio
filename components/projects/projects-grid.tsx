@@ -36,6 +36,13 @@ const projectVisualMap: Record<string, React.ComponentType> = {
 
 const shippedProjects: Project[] = [
   {
+    title: "FloodLens",
+    description: "AI flood area detection from Sentinel-2 — pixel-level inundation maps (IoU 0.68, ~6× vs NDWI), edge-deployed in-browser via ONNX. Overcame majority-class collapse with weighted BCE + soft Dice loss.",
+    stack: ["PyTorch", "FastAPI", "React", "ONNX"],
+    github: "https://github.com/arpan-s-dev/floodlens",
+    badges: ["🌍 AI for Good", "⚡ Edge AI"]
+  },
+  {
     title: "Unified Load Board",
     description: "One interface for loads across DAT, Truckstop, and Amazon Relay. FastAPI backend, adapter-pattern architecture, Next.js frontend.",
     stack: ["FastAPI", "Next.js", "Python", "TypeScript", "Pydantic"],
