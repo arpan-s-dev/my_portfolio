@@ -4,6 +4,7 @@ import { ProfileCard } from "@/components/home/profile-card"
 import { GitHubActivity } from "@/components/home/github-activity"
 import { TerritoryMap } from "@/components/home/territory-map"
 import { LinkedInCard } from "@/components/home/linkedin-card"
+import { HackathonBadges } from "@/components/home/hackathon-badges"
 import { AchievementHighlights } from "@/components/home/achievement-highlights"
 import { TechStack } from "@/components/home/tech-stack"
 import { BootIntro } from "@/components/home/boot-intro"
@@ -30,6 +31,8 @@ export default async function HomePage() {
         <section id="home" className="scroll-mt-28">
           <div className="mx-auto max-w-[1300px] px-6 pt-28 pb-12 md:pt-32">
             <div className="grid auto-rows-min grid-flow-row-dense grid-cols-12 gap-6">
+              {/* Profile keeps full height; LinkedIn shrinks and a compact
+                  Hackathon badges card nests beneath it in the right column. */}
               <div className="col-span-12 md:col-span-4 md:row-span-2">
                 <ProfileCard />
               </div>
@@ -44,8 +47,9 @@ export default async function HomePage() {
               <div className="col-span-12 md:col-span-5">
                 <TerritoryMap />
               </div>
-              <div className="col-span-12 md:col-span-3">
+              <div className="col-span-12 md:col-span-3 flex flex-col gap-6">
                 <LinkedInCard />
+                <HackathonBadges />
               </div>
 
               <div className="col-span-12">

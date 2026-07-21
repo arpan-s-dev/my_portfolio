@@ -972,7 +972,146 @@
   text-shadow: 0 0 14px var(--accent);
 }
 
+/* ============================================================
+   Hackathon winnings badges — radiating rings, rising embers,
+   glowing medal icon, and a periodic shine sweep. Colours ride
+   on var(--accent) so they adapt to the active theme.
+   ============================================================ */
+.hackathon-badge {
+  position: relative;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+.hackathon-badge:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 10px 26px -14px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* Glossy medallion that holds the trophy / medal icon */
+.hackathon-medallion {
+  position: relative;
+  background: radial-gradient(
+    circle at 35% 30%,
+    color-mix(in srgb, var(--accent) 40%, transparent),
+    color-mix(in srgb, var(--accent) 14%, transparent)
+  );
+  box-shadow: inset 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* Concentric rings that expand outward like a radar ping */
+.hackathon-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1.5px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  animation: hackathon-ring 2.6s ease-out infinite;
+  pointer-events: none;
+}
+.hackathon-ring.ring-2 {
+  animation-delay: 1.3s;
+}
+@keyframes hackathon-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Icon breathing glow */
+.hackathon-medal-icon {
+  animation: hackathon-icon-glow 2.8s ease-in-out infinite;
+}
+@keyframes hackathon-icon-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 1px color-mix(in srgb, var(--accent) 45%, transparent));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px var(--accent));
+  }
+}
+
+/* Embers / sparks rising off the medallion */
+.hackathon-ember {
+  position: absolute;
+  bottom: 52%;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--accent);
+  opacity: 0;
+  animation: hackathon-ember 2.6s ease-in infinite;
+  pointer-events: none;
+}
+@keyframes hackathon-ember {
+  0% {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--ember-dx, 0px)), -22px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+/* Periodic diagonal shine sweeping across the badge */
+.hackathon-shine-wrap {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hackathon-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 38%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 22%, transparent),
+    transparent
+  );
+  transform: translateX(-160%) skewX(-18deg);
+  animation: hackathon-shine 4.8s ease-in-out infinite;
+}
+@keyframes hackathon-shine {
+  0%,
+  22% {
+    transform: translateX(-160%) skewX(-18deg);
+  }
+  62%,
+  100% {
+    transform: translateX(330%) skewX(-18deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .hackathon-ring,
+  .hackathon-ember {
+    display: none;
+  }
+  .hackathon-medal-icon,
+  .hackathon-shine {
+    animation: none;
+  }
+  .hackathon-badge:hover {
+    transform: none;
+  }
+
   .repairman-sprite,
   .repairman-hammer,
   .wrecker-fist {
