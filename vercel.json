@@ -1,6 +1,11 @@
 {
   "framework": "nextjs",
+  "git": {
+    "deploymentEnabled": {
+      "output": false
+    }
+  },
   "ignoreCommand": "node -e \"process.exit(process.env.VERCEL_GIT_COMMIT_REF === 'output' ? 0 : 1)\"",
-  "buildCommand": "npm run build",
+  "buildCommand": "next build",
   "installCommand": "npm install"
 }
