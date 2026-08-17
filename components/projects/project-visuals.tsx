@@ -417,3 +417,67 @@ export function FineTuningVisual() {
     </div>
   )
 }
+
+// ── 9. NoteDP — DP noise on a clinical note ────────────────────────────
+export function NoteDPVisual() {
+  const { theme } = useTheme()
+  const c = theme === "arthur" ? "#c9a961" : "#a855f7"
+  const bodyLines = [48, 60, 72, 84, 96]
+  const specks = [
+    [96, 40], [118, 52], [142, 38], [168, 58], [188, 46],
+    [108, 78], [134, 70], [158, 88], [176, 74], [124, 94],
+    [150, 50], [98, 66], [180, 92], [112, 44], [164, 64],
+  ]
+  return (
+    <div className="relative w-full h-36 overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
+      <GridBg c={c} />
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 280 144" aria-hidden="true">
+        <rect x="68" y="10" width="144" height="112" rx="4" fill={`${c}0e`} stroke={c} strokeWidth="0.85" opacity="0.85" />
+        <text x="140" y="26" textAnchor="middle" fill={c} fontSize="8" fontFamily="monospace">DISCHARGE NOTE</text>
+
+        {/* Identifier line — name scrambles into a redaction token */}
+        <rect x="80" y="34" width="120" height="10" rx="2" fill={`${c}22`} stroke={c} strokeWidth="0.6" />
+        <text x="140" y="42" textAnchor="middle" fill={c} fontSize="7" fontFamily="monospace">
+          Elena Voss
+          <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.35;0.45;0.9;1" dur="3.2s" repeatCount="indefinite" />
+        </text>
+        <text x="140" y="42" textAnchor="middle" fill={c} fontSize="7" fontFamily="monospace">
+          {"<PATIENT>"}
+          <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.35;0.45;0.9;1" dur="3.2s" repeatCount="indefinite" />
+        </text>
+
+        {bodyLines.map((y, i) => (
+          <rect key={i} x="80" y={y} width={i % 3 === 0 ? 112 : i % 2 === 0 ? 96 : 78} height="5" rx="1.5"
+            fill={c} opacity="0.16" />
+        ))}
+
+        {/* Gaussian noise specks over the note */}
+        {specks.map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r={i % 3 === 0 ? 1.8 : 1.2} fill={c}>
+            <animate attributeName="opacity" values="0;0.7;0" dur={`${1.6 + (i % 6) * 0.18}s`} begin={`${(i % 5) * 0.12}s`} repeatCount="indefinite" />
+            <animate attributeName="cy" values={`${y};${y - 6};${y}`} dur={`${2.2 + (i % 4) * 0.2}s`} repeatCount="indefinite" />
+          </circle>
+        ))}
+
+        {/* Noise sweep across embeddings */}
+        <rect x="68" y="10" width="10" height="112" fill={c} opacity="0.16">
+          <animate attributeName="x" values="68;202;68" dur="3.2s" repeatCount="indefinite" />
+        </rect>
+        <line x1="73" y1="10" x2="73" y2="122" stroke={c} strokeWidth="1.4" opacity="0.7">
+          <animate attributeName="x1" values="73;207;73" dur="3.2s" repeatCount="indefinite" />
+          <animate attributeName="x2" values="73;207;73" dur="3.2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.35;0.85;0.35" dur="3.2s" repeatCount="indefinite" />
+        </line>
+
+        <rect x="8" y="8" width="50" height="16" rx="3" fill={`${c}1e`} stroke={c} strokeWidth="0.75" />
+        <text x="33" y="19" textAnchor="middle" fill={c} fontSize="7.5" fontFamily="monospace">eps 0.1</text>
+        <rect x="222" y="8" width="50" height="16" rx="3" fill={`${c}1e`} stroke={c} strokeWidth="0.75" />
+        <text x="247" y="19" textAnchor="middle" fill={c} fontSize="7.5" fontFamily="monospace">LOCAL</text>
+        <text x="140" y="136" textAnchor="middle" fill={c} fontSize="6.5" fontFamily="monospace" opacity="0.5">
+          Gaussian · RDP · FastAPI
+        </text>
+      </svg>
+      <FadeEdge />
+    </div>
+  )
+}

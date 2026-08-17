@@ -11,6 +11,7 @@ import {
   FloodLensVisual,
   RAGVisual,
   FineTuningVisual,
+  NoteDPVisual,
 } from "@/components/projects/project-visuals"
 
 interface Project {
@@ -32,6 +33,7 @@ const projectVisualMap: Record<string, React.ComponentType> = {
   "FreightField AI": FreightFieldVisual,
   "RAG System": RAGVisual,
   "Fine-Tuning Experiments": FineTuningVisual,
+  "NoteDP": NoteDPVisual,
 }
 
 const shippedProjects: Project[] = [
@@ -68,10 +70,11 @@ const shippedProjects: Project[] = [
     github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR"
   },
   {
-    title: "ChartCloak",
-    description: "Laptop demo of Alghamdi’s PrivLLM-Guard: DP noise in embeddings and attention, hierarchical ε, RDP accounting, and a FastAPI chart UI on ten fictional EHRs. Not a paper Table 2 reproduction.",
+    title: "NoteDP",
+    description: "Local implementation of Alghamdi’s PrivLLM-Guard: DP noise in embeddings and attention, hierarchical ε, and a FastAPI UI over ten synthetic clinical notes. Not a paper Table 2 reproduction.",
     stack: ["PyTorch", "FastAPI", "Differential Privacy", "YAML", "Gradio"],
-    github: "https://github.com/arpan-s-dev/ChartCloak"
+    github: "https://github.com/arpan-s-dev/NoteDP",
+    badges: ["🔒 Differential Privacy", "🩺 Synthetic notes"]
   }
 ]
 
@@ -148,7 +151,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
         {/* Title */}
         <h3
-          className="font-display text-xl font-semibold mb-2 pr-20"
+          className={`font-display text-xl font-semibold mb-2 ${project.planned ? "pr-20" : ""}`}
           style={{ color: "var(--text-primary)" }}
         >
           {project.title}
