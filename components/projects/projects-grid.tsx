@@ -68,10 +68,10 @@ const shippedProjects: Project[] = [
     github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR"
   },
   {
-    title: "PrivLLM-Guard",
-    description: "Citation-anchored PyTorch implementation of Alghamdi’s PrivLLM-Guard (DP noise in embeddings and attention, hierarchical ε, RDP accounting) with a local FastAPI chart UI on ten fictional EHRs. Laptop demo — not a paper Table 2 reproduction.",
+    title: "ChartCloak",
+    description: "Laptop demo of Alghamdi’s PrivLLM-Guard: DP noise in embeddings and attention, hierarchical ε, RDP accounting, and a FastAPI chart UI on ten fictional EHRs. Not a paper Table 2 reproduction.",
     stack: ["PyTorch", "FastAPI", "Differential Privacy", "YAML", "Gradio"],
-    github: "https://github.com/arpan-s-dev/PrivLLM-Guard"
+    github: "https://github.com/arpan-s-dev/ChartCloak"
   }
 ]
 

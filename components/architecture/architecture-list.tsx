@@ -999,11 +999,11 @@ const architectureProjects: ArchitectureProject[] = [
     }
   },
   {
-    id: "privllm-guard",
-    title: "PrivLLM-Guard",
+    id: "chartcloak",
+    title: "ChartCloak",
     tags: ["Differential Privacy", "Clinical NLP"],
-    description: "Citation-anchored encoder–decoder that injects Gaussian noise into embeddings and attention, tracks a hierarchical privacy budget, and demos the stack on ten fictional charts through a local FastAPI UI.",
-    github: "https://github.com/arpan-s-dev/PrivLLM-Guard",
+    description: "Laptop demo of Alghamdi’s PrivLLM-Guard: an encoder–decoder that injects Gaussian noise into embeddings and attention, tracks a hierarchical privacy budget, and reviews ten fictional charts in a local FastAPI UI.",
+    github: "https://github.com/arpan-s-dev/ChartCloak",
     stats: [
       { label: "Tracked LOC", value: "~8.4k", icon: BarChart3 },
       { label: "API routes", value: "4", icon: Zap },
