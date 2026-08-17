@@ -66,6 +66,12 @@ const shippedProjects: Project[] = [
     description: "Earlier heuristic predecessor of Freight Doc Matcher. Python CLI that matches Bills of Lading to Rate Confirmations across 13 brokers via a hybrid Tesseract + Claude extraction pipeline and a 100-point additive scorer. Outputs hyperlinked Excel.",
     stack: ["Python", "Claude API", "Tesseract", "openpyxl", "pdfplumber"],
     github: "https://github.com/arpan-s-dev/POD_RC_AUTO_OCR"
+  },
+  {
+    title: "PrivLLM-Guard",
+    description: "Citation-anchored PyTorch implementation of Alghamdi’s PrivLLM-Guard (DP noise in embeddings and attention, hierarchical ε, RDP accounting) with a local FastAPI chart UI on ten fictional EHRs. Laptop demo — not a paper Table 2 reproduction.",
+    stack: ["PyTorch", "FastAPI", "Differential Privacy", "YAML", "Gradio"],
+    github: "https://github.com/arpan-s-dev/PrivLLM-Guard"
   }
 ]
 

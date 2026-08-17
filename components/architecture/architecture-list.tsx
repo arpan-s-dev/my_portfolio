@@ -630,6 +630,41 @@ const floodLensSequence = `sequenceDiagram
     end
     Page-->>User: Blue overlay + water %`
 
+const privllmGuardDiagram = `flowchart LR
+    subgraph Data["Synthetic charts"]
+        CH["charts.py<br/>SyntheticChart"]
+        EX["chart.excerpt"]
+    end
+
+    subgraph UI["Local chart UI"]
+        WEB["webui/<br/>index.html"]
+        API["server.py<br/>FastAPI"]
+        RED["redact.sanitize_chart"]
+    end
+
+    subgraph Core["PrivLLM-Guard"]
+        ENG["pipeline.DemoEngine.run"]
+        TOK["WordTokenizer"]
+        ANC["AdaptiveNoiseCalibrator"]
+        MOD["PrivLLMGuard<br/>encode / decode"]
+    end
+
+    subgraph Train["Training"]
+        DS["data.SyntheticClinicalNotes"]
+        TR["train.dp_sgd_microbatch"]
+        CK{"demo.pt?"}
+    end
+
+    WEB --> API
+    API --> CH
+    CH --> RED
+    CH --> EX
+    EX --> ENG
+    ENG --> TOK --> ANC --> MOD
+    DS --> TR
+    TR --> CK
+    CK --> ENG`
+
 const architectureProjects: ArchitectureProject[] = [
   {
     id: "floodlens",
@@ -960,6 +995,60 @@ const architectureProjects: ArchitectureProject[] = [
         "Vector index for blocking at scale (FAISS / pgvector) once doc counts exceed ~10k",
         "Lane-level forecasting on the DuckDB warehouse — RPM trends, broker churn signals",
         "Power BI / Tableau template workbooks shipped alongside the Parquet exports"
+      ]
+    }
+  },
+  {
+    id: "privllm-guard",
+    title: "PrivLLM-Guard",
+    tags: ["Differential Privacy", "Clinical NLP"],
+    description: "Citation-anchored encoder–decoder that injects Gaussian noise into embeddings and attention, tracks a hierarchical privacy budget, and demos the stack on ten fictional charts through a local FastAPI UI.",
+    github: "https://github.com/arpan-s-dev/PrivLLM-Guard",
+    stats: [
+      { label: "Tracked LOC", value: "~8.4k", icon: BarChart3 },
+      { label: "API routes", value: "4", icon: Zap },
+      { label: "Synthetic charts", value: "10", icon: TrendingUp },
+      { label: "Src modules", value: "11+", icon: Activity }
+    ],
+    category: "AI Pipelines",
+    systemDesignDiagram: privllmGuardDiagram,
+    techStack: [
+      { layer: "Model", choice: "PyTorch encoder–decoder", why: "Matches the paper’s `PrivLLMGuard` path: embedding noise (Eq. 3) and attention noise (Eq. 4) in `model.py`." },
+      { layer: "Privacy math", choice: "Custom `privacy.py`", why: "Gaussian mechanism, RDP accountant, ANC, and sliding-window budget tracker mapped to Eqs. 6–7, 9, 16–19." },
+      { layer: "Training", choice: "`dp_sgd_microbatch` in `train.py`", why: "Per-example clip + Gaussian DP-SGD as specified; the laptop `demo.pt` is a separate non-DP overfitting run so the UI stays readable." },
+      { layer: "Config", choice: "YAML (`base` / `walkthrough` / `demo`)", why: "Paper-scale `d_model=768` vs CPU demo `d_model=64` without forking the code." },
+      { layer: "Local UI", choice: "FastAPI + static `webui/`", why: "Chart review on `127.0.0.1:8080`. Hugging Face Gradio Spaces currently need PRO; Vercel cannot run PyTorch." },
+      { layer: "Data", choice: "Fictional `charts.py`", why: "Ten invented EHRs (`SYN-4401`…`4410`). No MIMIC, no real PHI in the repo." }
+    ],
+    implementation: [
+      {
+        heading: "Paper body over unofficial GitHub",
+        body: [
+          "Alghamdi’s `ansbuedu/code5` `pllm.py` disagrees with several equations (including a `σ × 0.01` DP-SGD scale). This repo implements the paper text and records every unspecified default in `REPRODUCTION_NOTES.md`.",
+          "`GaussianMechanism.calibrate_sigma` follows Eq. 6 as written. Hierarchical ε splits live in `configs/*.yaml` (`epsilon_enc/dec/att/out`)."
+        ]
+      },
+      {
+        heading: "Two different training paths",
+        body: [
+          "`train.dp_sgd_microbatch` is the paper-style loop. `scripts/train_demo_checkpoint.py` overfits seven synthetic templates without DP-SGD so the browser demo can show a readable reconstruction on CPU.",
+          "The UI never claims paper Table 2 BLEU-4 / ROUGE-L. Runtime BLEU is between noisy and clean reconstructions of the same tiny excerpt."
+        ]
+      },
+      {
+        heading: "Chart UI vs the DP model",
+        body: [
+          "`GET /api/charts/{id}` returns the full fictional note plus `redact.sanitize_chart` for display. `POST /api/run` feeds only `chart.excerpt` into `DemoEngine.run`.",
+          "Display redaction is regex on planted fake fields. It is not a certified de-identifier and is not the differential-privacy mechanism."
+        ]
+      }
+    ],
+    outcomes: {
+      status: "Internship / research reproduction with a local laptop demo. Not a hospital product and not a reproduction of the paper’s MIMIC-III Table 2 numbers.",
+      roadmap: [
+        "Paper-scale training on credentialed clinical corpora (MIMIC / i2b2) — not in this repo",
+        "Expand pytest beyond census / redact / FastAPI smoke tests",
+        "Hosted Gradio Space only if Hugging Face PRO is available"
       ]
     }
   }
